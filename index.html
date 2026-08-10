@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d13">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Spot the Ball — Beat the Judges. Win the Dream.</title>
+<meta name="description" content="The skill game of judgement. Place your crosshair, beat the judges, win life-changing prizes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='38' fill='none' stroke='%23F2B24B' stroke-width='8'/><line x1='50' y1='2' x2='50' y2='28' stroke='%23F2B24B' stroke-width='8'/><line x1='50' y1='72' x2='50' y2='98' stroke='%23F2B24B' stroke-width='8'/><line x1='2' y1='50' x2='28' y2='50' stroke='%23F2B24B' stroke-width='8'/><line x1='72' y1='50' x2='98' y2='50' stroke='%23F2B24B' stroke-width='8'/><circle cx='50' cy='50' r='8' fill='%23F2B24B'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;600;700;800&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=6">
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar">
+  <a class="brand" href="#/">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38" fill="none" stroke="currentColor" stroke-width="8"/><line x1="50" y1="0" x2="50" y2="26" stroke="currentColor" stroke-width="8"/><line x1="50" y1="74" x2="50" y2="100" stroke="currentColor" stroke-width="8"/><line x1="0" y1="50" x2="26" y2="50" stroke="currentColor" stroke-width="8"/><line x1="74" y1="50" x2="100" y2="50" stroke="currentColor" stroke-width="8"/><circle cx="50" cy="50" r="8" fill="currentColor"/></svg>
+    </span>
+    <span class="brand-word">SPOT THE <em>BALL</em></span>
+  </a>
+  <nav class="topnav">
+    <a href="#/" data-nav="home">Competitions</a>
+    <a href="#/tournament" data-nav="tournament">Weekly Tournament</a>
+    <a href="#/how" data-nav="how">How to Play</a>
+  </nav>
+  <div class="top-actions">
+    <button class="wallet-chip" id="walletChip" title="Your balance">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M16 13h4"/><path d="M2 10h20"/></svg>
+      <span id="walletAmount">$0.00</span>
+      <b>+</b>
+    </button>
+    <div class="avatar" title="Demo player">GM</div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer class="site-footer">
+  <div class="foot-inner">
+    <div>
+      <div class="foot-brand">SPOT THE <em>BALL</em></div>
+      <p>A skill-based judgement game. No random draws — the sharpest eye wins.<br>Demo build · all balances &amp; prizes simulated.</p>
+    </div>
+    <div class="foot-cols">
+      <div><h5>Play</h5><a href="#/">Live competitions</a><a href="#/tournament">Weekly tournament</a><a href="#/how">Rules &amp; judging</a></div>
+      <div><h5>Sports</h5><a href="#/sport/soccer">Soccer</a><a href="#/sport/football">Football</a><a href="#/sport/basketball">Basketball</a></div>
+      <div><h5>Legal</h5><a href="#/how">Skill game statement</a><a href="#/how">Responsible play</a><a href="#/how">Terms</a></div>
+    </div>
+  </div>
+  <div class="foot-line">© 2026 Spot the Ball — concept demo. Photography for demonstration only. 18+ where applicable.</div>
+</footer>
+
+<!-- Wallet modal -->
+<div class="modal-veil" id="walletModal" hidden>
+  <div class="modal wallet-modal">
+    <button class="modal-x" data-close-wallet>×</button>
+    <h3>Wallet</h3>
+    <div class="wm-balance"><span>Available balance</span><strong id="wmBalance">$0.00</strong></div>
+    <div class="wm-topup">
+      <span>Top up (demo funds)</span>
+      <div class="wm-btns">
+        <button class="btn ghost" data-topup="10">+$10</button>
+        <button class="btn ghost" data-topup="25">+$25</button>
+        <button class="btn ghost" data-topup="100">+$100</button>
+      </div>
+    </div>
+    <h4>Recent activity</h4>
+    <ul class="wm-tx" id="wmTx"></ul>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" hidden></div>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<!-- Mobile bottom nav -->
+<nav class="mobile-nav">
+  <a href="#/" data-nav="home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><line x1="12" y1="1" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="23"/><line x1="1" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="23" y2="12"/></svg>
+    <span>Play</span>
+  </a>
+  <a href="#/tournament" data-nav="tournament">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0z"/><path d="M7 6H4a2 2 0 0 0 2 5M17 6h3a2 2 0 0 1-2 5"/></svg>
+    <span>Tournament</span>
+  </a>
+  <a href="#/how" data-nav="how">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12" y2="17.01"/></svg>
+    <span>How</span>
+  </a>
+  <button id="mobileWallet">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+    <span id="mwAmount">Wallet</span>
+  </button>
+</nav>
+
+<script src="js/data.js?v=6"></script>
+<script src="js/prizes.js?v=6"></script>
+<script src="js/api.js?v=6"></script>
+<script src="js/app.js?v=6"></script>
+</body>
+</html>

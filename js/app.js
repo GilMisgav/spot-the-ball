@@ -1,0 +1,616 @@
+/* ============================================================
+   SPOTTED.club — app shell (hash router + views)
+   Talks to API only; rendering is string-template based.
+   ============================================================ */
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+const app = $('#app');
+const money = n => '$' + n.toFixed(2);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let tickTimers = [];
+function clearTicks() { tickTimers.forEach(clearInterval); tickTimers = []; }
+
+/* ---------- countdown ---------- */
+function fmtLeft(ms) {
+  if (ms <= 0) return 'CLOSED';
+  const s = Math.floor(ms / 1000);
+  const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600),
+        m = Math.floor((s % 3600) / 60), ss = s % 60;
+  if (d > 0) return `${d}d ${h}h ${String(m).padStart(2, '0')}m`;
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m ${String(ss).padStart(2, '0')}s`;
+  return `${m}m ${String(ss).padStart(2, '0')}s`;
+}
+function liveCountdowns() {
+  const t = setInterval(() => {
+    $$('[data-deadline]').forEach(el => {
+      const left = +el.dataset.deadline - Date.now();
+      el.textContent = fmtLeft(left);
+      el.classList.toggle('hot', left > 0 && left < 4 * 3600 * 1000);
+    });
+  }, 1000);
+  tickTimers.push(t);
+}
+
+/* ---------- wallet ---------- */
+async function refreshWallet(bump = false) {
+  const me = await API.me();
+  $('#walletAmount').textContent = money(me.balance);
+  const mw = $('#mwAmount'); if (mw) mw.textContent = money(me.balance).replace('.00', '');
+  if (bump) {
+    const chip = $('#walletChip');
+    chip.classList.remove('bump'); void chip.offsetWidth; chip.classList.add('bump');
+  }
+  return me;
+}
+async function openWallet() {
+  const me = await refreshWallet();
+  $('#wmBalance').textContent = money(me.balance);
+  $('#wmTx').innerHTML = me.tx.map(t => `
+    <li><span>${esc(t.label)}</span>
+    <span class="amt ${t.amt > 0 ? 'pos' : ''}">${t.amt > 0 ? '+' : '−'}${money(Math.abs(t.amt))}</span></li>`).join('');
+  $('#walletModal').hidden = false;
+}
+$('#walletChip').addEventListener('click', openWallet);
+$('#mobileWallet')?.addEventListener('click', openWallet);
+$('#walletModal').addEventListener('click', async e => {
+  if (e.target.dataset.closeWallet !== undefined || e.target === $('#walletModal')) $('#walletModal').hidden = true;
+  const amt = e.target.dataset.topup;
+  if (amt) {
+    await API.topUp(+amt);
+    const me = await refreshWallet(true);
+    $('#wmBalance').textContent = money(me.balance);
+    toast(`Added ${money(+amt)} demo funds`);
+    openWallet();
+  }
+});
+
+/* ---------- toast + confetti ---------- */
+let toastT;
+function toast(msg, err = false) {
+  const el = $('#toast');
+  el.textContent = msg; el.className = 'toast' + (err ? ' err' : ''); el.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 3200);
+}
+function confetti() {
+  const cv = $('#confetti'), ctx = cv.getContext('2d');
+  cv.width = innerWidth; cv.height = innerHeight;
+  const P = Array.from({ length: 160 }, () => ({
+    x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5,
+    w: 5 + Math.random() * 6, h: 8 + Math.random() * 8,
+    vy: 2 + Math.random() * 3.5, vx: -1.2 + Math.random() * 2.4,
+    rot: Math.random() * Math.PI, vr: -.1 + Math.random() * .2,
+    c: ['#f2b24b', '#ffd98a', '#ffffff', '#3ddc84', '#ff7a3d'][Math.floor(Math.random() * 5)],
+  }));
+  let frame = 0;
+  (function draw() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    P.forEach(p => {
+      p.y += p.vy; p.x += p.vx; p.rot += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    });
+    if (++frame < 260) requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, cv.width, cv.height);
+  })();
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+
+function compCard(c) {
+  const s = SPORTS[c.sport];
+  const left = c.closesAt - Date.now();
+  const pct = Math.min(100, Math.round((c.sold / c.cap) * 100));
+  return `
+  <a class="comp-card" href="#/play/${c.id}" style="--acc:${s.accent}">
+    <div class="cc-plate">
+      <svg class="plate-mark" viewBox="0 0 400 250" aria-hidden="true">
+        <circle cx="200" cy="125" r="70" fill="none" stroke="currentColor"/>
+        <circle cx="200" cy="125" r="110" fill="none" stroke="currentColor"/>
+        <circle cx="200" cy="125" r="150" fill="none" stroke="currentColor"/>
+        <line x1="200" y1="-20" x2="200" y2="270" stroke="currentColor"/>
+        <line x1="-20" y1="125" x2="420" y2="125" stroke="currentColor"/>
+      </svg>
+      <span class="cc-sport"><span>${s.icon}</span> ${s.label}</span>
+      ${c.closed
+        ? `<span class="cc-flag closed">RESULTS IN</span>`
+        : c.featured ? `<span class="cc-flag">FEATURED</span>` : ''}
+      ${c.prizeImg
+        ? `<img class="cc-photo" src="${c.prizeImg}" alt="${esc(c.prize)}" loading="lazy">`
+        : `<div class="cc-art">${PRIZE_ART[c.prizeType] || PRIZE_ART.cash}</div>`}
+      <div class="cc-prize">
+        <div class="p-label">Win</div>
+        <div class="p-value">${esc(c.prize)}</div>
+      </div>
+    </div>
+    <div class="cc-body">
+      <div class="cc-title">${esc(c.title)}</div>
+      <div class="cc-sub">${esc(c.sub)}</div>
+      <div class="cc-meta">
+        <span>⏱ <span class="cd" data-deadline="${c.closesAt}">${c.closed ? 'CLOSED' : fmtLeft(left)}</span></span>
+        <span>${c.sold.toLocaleString()} tickets</span>
+      </div>
+      <div class="cc-bar"><i style="width:${pct}%"></i></div>
+      <div class="cc-foot">
+        <span class="cc-fee">from <b>${money(PRICE_TIERS[0].each)}</b> / ticket</span>
+        <span class="btn" style="padding:9px 18px;font-size:13px">${c.closed ? 'See results' : 'Play now'}</span>
+      </div>
+      ${c.myTickets ? `<div class="cc-mine">▸ You hold ${c.myTickets} ticket${c.myTickets > 1 ? 's' : ''} here</div>` : ''}
+    </div>
+  </a>`;
+}
+
+/* ---------- HOME ---------- */
+async function viewHome(sportFilter) {
+  const comps = await API.listCompetitions();
+  const winners = await API.pastWinners();
+  const filtered = sportFilter ? comps.filter(c => c.sport === sportFilter) : comps;
+  const totalPrizes = '$310,000+';
+
+  app.innerHTML = `
+  <section class="hero">
+    <div class="hero-deco"><i class="ring"></i><i class="ring"></i><i class="ring"></i><i class="hline"></i><i class="vline"></i><i class="dot"></i></div>
+    <div class="hero-kicker"><span class="live-dot"></span> ${comps.filter(c => !c.closed).length} competitions live now</div>
+    <h1>Spot the ball.<br><span class="x">Beat the judges.</span><br><span class="g">Win the dream.</span></h1>
+    <p class="hero-sub">The ball has been removed from a frozen moment of play. Study the eyes, the shape, the physics — then place your crosshair where the ball must be. <strong>Pure judgement. Zero luck.</strong> Closest to the judges' position takes the prize.</p>
+    <div class="hero-cta">
+      <a class="btn big" href="#comps">Enter a competition</a>
+      <a class="btn big ghost" href="#/how">How judging works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="n">${totalPrizes}</div><div class="l">Live prize board</div></div>
+      <div class="hstat"><div class="n">${comps.reduce((a, c) => a + c.sold, 0).toLocaleString()}</div><div class="l">Tickets this week</div></div>
+      <div class="hstat"><div class="n">3</div><div class="l">Sports covered</div></div>
+      <div class="hstat"><div class="n">1mm</div><div class="l">Judging precision</div></div>
+    </div>
+  </section>
+
+  <div class="moments" aria-hidden="true">
+    <div class="m-track">
+      ${[...comps, ...comps].map(c => `<div class="m-cell"><img src="${c.img}" alt="" loading="lazy"><span>${SPORTS[c.sport].icon} ${esc(c.title)}</span></div>`).join('')}
+    </div>
+    <div class="m-caption">This week's frozen moments — the ball is out there</div>
+  </div>
+
+  <section class="section" id="comps">
+    <div class="sec-head"><h2>Live competitions</h2><span class="count">${filtered.length} open boards</span></div>
+    <div class="sport-tabs">
+      <button class="sport-tab ${!sportFilter ? 'active' : ''}" data-sport="">All sports</button>
+      ${Object.entries(SPORTS).map(([k, s]) =>
+        `<button class="sport-tab ${sportFilter === k ? 'active' : ''}" data-sport="${k}"><span class="ico">${s.icon}</span>${s.label}</button>`).join('')}
+    </div>
+    ${Object.entries(SPORTS).filter(([k]) => !sportFilter || k === sportFilter).map(([k, s]) => {
+      const group = comps.filter(c => c.sport === k);
+      const pool = group.length;
+      return `
+      <div class="sport-block" style="--acc:${s.accent}">
+        <div class="sport-divider">
+          <span class="sd-medal">${s.icon}</span>
+          <h3 class="sd-word">${s.label}</h3>
+          <span class="sd-line"></span>
+          <span class="sd-count">${pool} live board${pool > 1 ? 's' : ''} · closest crosshair takes the prize</span>
+        </div>
+        <div class="comp-grid">${group.map(compCard).join('')}</div>
+      </div>`;
+    }).join('')}
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>How it works</h2></div>
+    <div class="how-grid">
+      <div class="how-card"><div class="num">01</div><h3>Pick a moment</h3><p>Choose a competition. Every photo is a real frame of play with the ball digitally removed.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Place your crosshair</h3><p>Read the players — their eyes, their bodies, the geometry of the play. Drop up to 25 crosshairs per entry. More tickets, better odds, bigger discount.</p></div>
+      <div class="how-card"><div class="num">03</div><h3>Judges decide</h3><p>When entries close, our panel of pros fixes the ball's true position. It's their judgement — not the original photo — that counts. Skill, not chance.</p></div>
+      <div class="how-card"><div class="num">04</div><h3>Closest wins</h3><p>Nearest crosshair takes the headline prize. Every entry earns precision points toward the weekly tournament pot.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>Recent winners</h2></div>
+    <div class="win-strip">
+      ${winners.map(w => `<div class="win-card"><div class="w">WEEK ${w.week.slice(1)}</div><div class="p">${esc(w.prize)}</div><div class="n">${esc(w.name)} · ${esc(w.from)}</div></div>`).join('')}
+    </div>
+  </section>`;
+
+  $$('.sport-tab').forEach(b => b.addEventListener('click', () => {
+    location.hash = b.dataset.sport ? `#/sport/${b.dataset.sport}` : '#/';
+  }));
+  liveCountdowns();
+}
+
+/* ---------- PLAY ---------- */
+async function viewPlay(id) {
+  const c = await API.getCompetition(id);
+  if (!c) { location.hash = '#/'; return; }
+  if (c.closed) { location.hash = `#/results/${id}`; return; }
+  const submitted = await API.myEntries(id);
+  const s = SPORTS[c.sport];
+  let picks = [];   // unsubmitted crosshairs
+
+  app.innerHTML = `
+  <div class="play-wrap">
+    <div class="play-top">
+      <a class="back-link" href="#/">← All competitions</a>
+      <div class="play-title">${esc(c.title)} <small>· ${s.icon} ${s.label}</small></div>
+      <div class="play-badges">
+        <span class="pb">Closes in <b><span data-deadline="${c.closesAt}">${fmtLeft(c.closesAt - Date.now())}</span></b></span>
+        <span class="pb">${c.sold.toLocaleString()} tickets in play</span>
+      </div>
+    </div>
+
+    <div class="play-grid">
+      <div>
+        <div class="board-shell">
+          <div class="board" id="board">
+            <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
+            <div class="hairV"></div><div class="hairH"></div>
+            <div class="reticle"></div>
+            <div class="coords"></div>
+            <div class="loupe"></div>
+          </div>
+          <div class="board-hint">
+            <span><span class="k">AIM</span> — move to inspect with the loupe · <span class="k">CLICK</span> — drop a crosshair · click a pin to remove it</span>
+            <span>${esc(c.sub)}</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-card">
+          <div class="prize-line">
+            <span class="p-art">${c.prizeImg
+              ? `<img src="${c.prizeImg}" alt="">`
+              : (PRIZE_ART[c.prizeType] || PRIZE_ART.cash)}</span>
+            <div><div class="l">Headline prize</div><div class="v">${esc(c.prize)}</div></div>
+          </div>
+          <div class="count-tiles">
+            <div class="ct"><div class="n" id="tileNew">0</div><div class="l">New picks</div></div>
+            <div class="ct"><div class="n" id="tileSub">${submitted.length}</div><div class="l">Submitted</div></div>
+            <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h4>Your crosshairs <span class="mono" id="pickCount"></span></h4>
+          <div class="picks" id="picksList"></div>
+          <div class="cost-row"><span>Entry cost</span> <span><span class="save" id="saveNote"></span> <b id="costTotal">$0.00</b></span></div>
+          <button class="btn big" id="submitBtn" disabled>Submit entry</button>
+          <div class="tier-hint">Bundles: 1× $3.00 · 5× <em>$2.40/ea</em> · 10× <em>$2.10/ea</em> · 25× <em>$1.80/ea</em></div>
+        </div>
+
+        <div class="panel-card demo-card">
+          <h4>Demo control</h4>
+          <p>Skip the wait — close this competition now, let the judges rule, and see the reveal flow.</p>
+          <button class="btn ghost" id="finishBtn">⏭ End contest &amp; reveal result</button>
+        </div>
+      </aside>
+    </div>
+  </div>`;
+
+  const board = $('#board'), img = $('img', board);
+  const loupe = $('.loupe', board), coords = $('.coords', board), reticle = $('.reticle', board);
+  const hairV = $('.hairV', board), hairH = $('.hairH', board);
+
+  refreshWallet().then(me => $('#tileBal').textContent = money(me.balance).replace('.00', ''));
+
+  /* pins render */
+  function renderPins() {
+    $$('.pin', board).forEach(p => p.remove());
+    submitted.forEach((p, i) => board.appendChild(pinEl(p, i + 1, true)));
+    picks.forEach((p, i) => board.appendChild(pinEl(p, submitted.length + i + 1, false)));
+    const n = picks.length;
+    $('#tileNew').textContent = n;
+    $('#tileSub').textContent = submitted.length;
+    $('#pickCount').textContent = `${n + submitted.length}/25`;
+    const cost = API.priceFor(n);
+    $('#costTotal').textContent = money(cost);
+    const full = n * PRICE_TIERS[PRICE_TIERS.length - 1].each;
+    $('#saveNote').textContent = full > cost ? `save ${money(full - cost)}` : '';
+    $('#submitBtn').disabled = n === 0;
+    $('#submitBtn').textContent = n ? `Submit ${n} ticket${n > 1 ? 's' : ''} · ${money(cost)}` : 'Submit entry';
+    $('#picksList').innerHTML = [
+      ...submitted.map((p, i) => `<div class="pick-row submitted"><span class="idx">${i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><span class="lock">✓ locked</span></div>`),
+      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><button class="del" data-del="${i}">×</button></div>`),
+    ].join('');
+    $$('[data-del]').forEach(b => b.addEventListener('click', () => { picks.splice(+b.dataset.del, 1); renderPins(); }));
+  }
+  function pinEl(p, n, locked) {
+    const el = document.createElement('div');
+    el.className = 'pin' + (locked ? ' submitted' : '');
+    el.style.left = p.x + '%'; el.style.top = p.y + '%';
+    el.innerHTML = `<span class="c"></span><span class="d"></span><span class="n">${n}</span>`;
+    if (!locked) el.addEventListener('click', e => {
+      e.stopPropagation();
+      picks = picks.filter(q => q !== p); renderPins();
+    });
+    return el;
+  }
+
+  /* aiming: hairlines + loupe */
+  const LZ = 2.6, LS = 150;
+  function aim(e) {
+    const r = board.getBoundingClientRect();
+    const cx = e.clientX - r.left, cy = e.clientY - r.top;
+    if (cx < 0 || cy < 0 || cx > r.width || cy > r.height) return;
+    board.classList.add('aiming');
+    hairV.style.left = cx + 'px'; hairH.style.top = cy + 'px';
+    reticle.style.left = cx + 'px'; reticle.style.top = cy + 'px';
+    coords.style.left = cx + 'px'; coords.style.top = cy + 'px';
+    coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`;
+    // loupe: keep inside board, offset away from cursor
+    const lx = cx + (cx > r.width - 190 ? -LS - 26 : 26);
+    const ly = cy + (cy > r.height - 190 ? -LS - 26 : 26);
+    loupe.style.left = lx + 'px'; loupe.style.top = ly + 'px';
+    loupe.style.backgroundImage = `url('${c.img}')`;
+    loupe.style.backgroundSize = `${r.width * LZ}px ${r.height * LZ}px`;
+    loupe.style.backgroundPosition = `${-(cx * LZ - LS / 2)}px ${-(cy * LZ - LS / 2)}px`;
+  }
+  board.addEventListener('mousemove', aim);
+  board.addEventListener('mouseleave', () => board.classList.remove('aiming'));
+  board.addEventListener('click', e => {
+    const r = board.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width * 100;
+    const y = (e.clientY - r.top) / r.height * 100;
+    if (picks.length + submitted.length >= 25) { toast('Max 25 crosshairs per player on one board', true); return; }
+    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2) });
+    renderPins();
+  });
+
+  $('#submitBtn').addEventListener('click', async () => {
+    try {
+      const res = await API.submitEntry(id, picks);
+      submitted.push(...picks.map(p => ({ ...p })));
+      picks = [];
+      renderPins();
+      await refreshWallet(true);
+      $('#tileBal').textContent = money(res.balance).replace('.00', '');
+      toast(`Entry locked in — ${res.total} ticket${res.total > 1 ? 's' : ''} on this board. Good luck! 🎯`);
+    } catch (err) {
+      if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
+      else toast(err.message, true);
+    }
+  });
+
+  $('#finishBtn').addEventListener('click', async () => {
+    if (picks.length) { toast('Submit or remove your pending crosshairs first', true); return; }
+    await API.closeCompetition(id);
+    location.hash = `#/results/${id}`;
+  });
+
+  renderPins();
+  liveCountdowns();
+}
+
+/* ---------- RESULTS ---------- */
+async function viewResults(id) {
+  const res = await API.getResults(id);
+  if (!res) { location.hash = '#/'; return; }
+  const { comp: c, target, ballImg, ballW, ballInPhoto, mine, rows, myRank, myBest } = res;
+  const s = SPORTS[c.sport];
+  const played = mine.length > 0;
+  const podium = played && myRank <= 3;
+
+  const headline = !played
+    ? 'The judges have ruled'
+    : podium
+      ? (myRank === 1 ? 'You nailed it!' : `Podium finish — P${myRank}!`)
+      : myRank <= 10 ? 'So close. Top ten.' : 'The judges have ruled';
+
+  app.innerHTML = `
+  <div class="play-wrap">
+    <div class="play-top">
+      <a class="back-link" href="#/">← All competitions</a>
+      <div class="play-title">${esc(c.title)} <small>· ${s.icon} ${s.label}</small></div>
+      <div class="play-badges"><span class="pb" style="color:var(--danger)">ENTRIES CLOSED</span></div>
+    </div>
+
+    <div class="res-hero">
+      <div class="rk">Official result · judged panel decision</div>
+      <h2>${headline}</h2>
+      <p>${played
+        ? `Your best crosshair landed <b style="color:var(--gold-hi)">${myBest.d.toFixed(2)} units</b> from the judges' ball — rank <b style="color:var(--gold-hi)">#${myRank}</b> of ${rows.length} entrants.`
+        : 'You didn\'t enter this one. The gold rings mark the judges\' final ball position.'}</p>
+      <div class="res-stats">
+        ${played ? `
+        <div class="res-stat"><div class="n ${podium ? 'top' : ''}">#${myRank}</div><div class="l">Your rank</div></div>
+        <div class="res-stat"><div class="n">${myBest.score}</div><div class="l">Best pin points</div></div>
+        <div class="res-stat"><div class="n">${mine.length}</div><div class="l">Your tickets</div></div>` : ''}
+        <div class="res-stat"><div class="n">${rows.length}</div><div class="l">Entrants ranked</div></div>
+      </div>
+    </div>
+
+    <div class="play-grid">
+      <div>
+        <div class="board-shell">
+          <div class="board" id="resBoard">
+            <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
+            ${ballImg ? `<img class="ball-real" src="${ballImg}" alt="" style="left:${target.x}%;top:${target.y}%;width:${ballW}%">` : ''}
+            <div class="ballmark" style="left:${target.x}%;top:${target.y}%">
+              <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+              ${ballImg || ballInPhoto ? '' : '<span class="ball"></span>'}
+              <span class="cmark"><i class="ch"></i><i class="cv"></i><i class="cd"></i></span>
+            </div>
+          </div>
+          <div class="board-hint">
+            <span><span class="k">●</span> the real ball, restored — centre marked ${played ? '· your pins numbered by closeness' : ''}</span>
+            <span>score = 1000 · e<sup>−d/9</sup> per pin</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn ghost" id="reopenBtn">↺ Re-open this contest (demo)</button>
+          <a class="btn" href="#/tournament">View weekly tournament →</a>
+        </div>
+      </div>
+
+      <aside class="panel">
+        <div class="panel-card lb-card">
+          <h4 style="padding:12px 14px 0">Final standings <span class="mono">closest wins</span></h4>
+          <table class="lb">
+            <thead><tr><th>#</th><th>Player</th><th>Dist</th><th style="text-align:right">Pts</th></tr></thead>
+            <tbody>
+              ${rows.slice(0, 12).map(r => `
+                <tr class="${r.me ? 'me' : ''} ${r.rank <= 3 ? 'podium' : ''}">
+                  <td class="r">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td>
+                  <td class="name">${esc(r.name)}</td>
+                  <td class="d">${r.d.toFixed(2)}</td>
+                  <td class="pts">${r.score}</td>
+                </tr>`).join('')}
+              ${myRank > 12 ? `
+                <tr><td colspan="4" style="text-align:center;color:var(--text-faint)">···</td></tr>
+                <tr class="me"><td class="r">${myRank}</td><td class="name">Gil M. (you)</td>
+                <td class="d">${myBest.d.toFixed(2)}</td><td class="pts">${myBest.score}</td></tr>` : ''}
+            </tbody>
+          </table>
+        </div>
+        ${played ? `
+        <div class="panel-card">
+          <h4>Your pins</h4>
+          <div class="picks">
+            ${mine.map((p, i) => `<div class="pick-row ${i === 0 ? 'submitted' : ''}">
+              <span class="idx">${i + 1}</span><span class="xy">d ${p.d.toFixed(2)}</span>
+              <span class="lock" style="color:${i === 0 ? 'var(--ok)' : 'var(--text-faint)'}">${p.score} pts</span></div>`).join('')}
+          </div>
+        </div>` : ''}
+      </aside>
+    </div>
+  </div>`;
+
+  /* draw my pins + distance line for best */
+  const rb = $('#resBoard');
+  mine.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'pin' + (i === 0 ? '' : ' submitted');
+    el.style.left = p.x + '%'; el.style.top = p.y + '%';
+    el.innerHTML = `<span class="c"></span><span class="d"></span><span class="n">${i + 1}</span>`;
+    rb.appendChild(el);
+  });
+  if (myBest) {
+    // dashed line from best pin to ball, in % space via transform
+    const img = $('img', rb);
+    const draw = () => {
+      $$('.dist-line', rb).forEach(e => e.remove());
+      const w = rb.clientWidth, h = rb.clientHeight;
+      const x1 = myBest.x / 100 * w, y1 = myBest.y / 100 * h;
+      const x2 = target.x / 100 * w, y2 = target.y / 100 * h;
+      const len = Math.hypot(x2 - x1, y2 - y1);
+      const ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+      const line = document.createElement('div');
+      line.className = 'dist-line';
+      line.style.cssText = `left:${x1}px;top:${y1}px;width:${len}px;transform:rotate(${ang}deg)`;
+      rb.appendChild(line);
+    };
+    if (img.complete) draw(); else img.addEventListener('load', draw);
+    addEventListener('resize', draw, { once: true });
+  }
+
+  $('#reopenBtn').addEventListener('click', async () => {
+    await API.reopenCompetition(id);
+    location.hash = `#/play/${id}`;
+  });
+
+  if (podium) setTimeout(confetti, 500);
+}
+
+/* ---------- TOURNAMENT ---------- */
+async function viewTournament() {
+  const t = await API.tournament();
+  app.innerHTML = `
+  <div class="tourn-hero">
+    <div>
+      <div class="hero-kicker"><span class="live-dot"></span> Weekly precision league</div>
+      <h1>${esc(t.name.split('—')[0])}<br><span>${esc(t.name.split('—')[1] || '')}</span></h1>
+      <p class="sub">Every crosshair you submit earns precision points. The sharpest eyes of the week split the <b style="color:var(--gold-hi)">${t.pool}</b> pot — win or lose the headline prizes.</p>
+    </div>
+    <div class="tourn-clock">
+      <div class="cd" data-deadline="${t.endsAt}">${fmtLeft(t.endsAt - Date.now())}</div>
+      <div class="l">until week closes</div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="tourn-grid">
+      <div class="panel-card lb-card">
+        <h4 style="padding:12px 14px 0">Leaderboard <span class="mono">points from best pin per contest</span></h4>
+        <table class="lb">
+          <thead><tr><th>#</th><th>Player</th><th>Contests</th><th style="text-align:right">Points</th></tr></thead>
+          <tbody>
+            ${t.rows.slice(0, 15).map(r => `
+              <tr class="${r.me ? 'me' : ''} ${r.rank <= 3 ? 'podium' : ''}">
+                <td class="r">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td>
+                <td class="name">${esc(r.name)}</td>
+                <td class="d">${r.comps}</td>
+                <td class="pts">${r.pts.toLocaleString()}</td>
+              </tr>`).join('')}
+            ${t.myRow && t.myRow.rank > 15 ? `
+              <tr><td colspan="4" style="text-align:center;color:var(--text-faint)">···</td></tr>
+              <tr class="me"><td class="r">${t.myRow.rank}</td><td class="name">Gil M. (you)</td>
+              <td class="d">${t.myRow.comps}</td><td class="pts">${t.myRow.pts.toLocaleString()}</td></tr>` : ''}
+          </tbody>
+        </table>
+        ${!t.myRow ? `<div class="tourn-empty" style="padding:16px">You're not on the board yet — enter a competition and let a contest finish to bank points. <a href="#/" style="color:var(--gold)">Browse live boards →</a></div>` : ''}
+      </div>
+      <div>
+        <div class="panel-card">
+          <h4>Prize tiers</h4>
+          ${t.tiers.map(x => `<div class="tier-row"><span>${x.place}</span><b>${x.prize}</b></div>`).join('')}
+        </div>
+        <div class="panel-card demo-card" style="margin-top:16px">
+          <h4>Demo control</h4>
+          <p>Wipe wallet, entries and results back to a fresh demo state.</p>
+          <button class="btn danger" id="resetBtn">Reset demo</button>
+        </div>
+      </div>
+    </div>
+  </section>`;
+
+  $('#resetBtn').addEventListener('click', async () => {
+    await API.resetDemo();
+    await refreshWallet(true);
+    toast('Demo reset — fresh $250 balance');
+    location.hash = '#/';
+  });
+  liveCountdowns();
+}
+
+/* ---------- HOW ---------- */
+async function viewHow() {
+  app.innerHTML = `
+  <div class="how-page">
+    <h1>Skill. <span>Not luck.</span></h1>
+    <p class="lead">Spot the Ball is a game of judgement — legally and philosophically the opposite of a lottery. Here's the full loop, exactly as the production build will run it.</p>
+    <div class="how-grid" style="grid-template-columns:1fr">
+      <div class="how-card"><div class="num">01</div><h3>The moment</h3><p>We license a professional sports photograph and digitally remove the ball. Nothing else in the frame is touched.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Your read</h3><p>Study eye-lines, body shape and physics. Use the loupe for millimetre placement, drop up to 25 crosshairs, and pay only for what you place — bundle discounts apply automatically.</p></div>
+      <div class="how-card"><div class="num">03</div><h3>The panel</h3><p>After entries close, a panel of former pros studies the frame and fixes the definitive ball position. The judges' ball — not the original photo — is the target. That's what keeps it 100% skill.</p></div>
+      <div class="how-card"><div class="num">04</div><h3>Scoring</h3><p>Each pin earns <b>1000 · e<sup>−d/9</sup></b> points, where d is the distance to the judges' ball in board units. Closest single pin takes the headline prize; your best pin per contest feeds the weekly tournament pot.</p></div>
+      <div class="how-card"><div class="num">05</div><h3>The wallet</h3><p>Top up, enter, withdraw winnings. In this demo the balance is simulated — the production app plugs a real PSP into the exact same API surface.</p></div>
+    </div>
+    <div style="margin-top:30px"><a class="btn big" href="#/">Try it now →</a></div>
+  </div>`;
+}
+
+/* ============================================================
+   ROUTER
+   ============================================================ */
+async function route() {
+  clearTicks();
+  refreshWallet();
+  const h = location.hash || '#/';
+  const [, path, arg] = h.match(/^#\/([^/]*)\/?(.*)$/) || [];
+  $$('[data-nav]').forEach(a => a.classList.remove('active'));
+  const setNav = k => $$(`[data-nav="${k}"]`).forEach(a => a.classList.add('active'));
+  scrollTo(0, 0);
+  if (path === 'play' && arg) { setNav('home'); return viewPlay(arg); }
+  if (path === 'results' && arg) { setNav('home'); return viewResults(arg); }
+  if (path === 'tournament') { setNav('tournament'); return viewTournament(); }
+  if (path === 'how') { setNav('how'); return viewHow(); }
+  if (path === 'sport' && arg) { setNav('home'); return viewHome(arg); }
+  setNav('home');
+  return viewHome();
+}
+addEventListener('hashchange', route);
+route();
+refreshWallet();
