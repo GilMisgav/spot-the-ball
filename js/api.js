@@ -20,12 +20,14 @@ const API = (() => {
       balance: START_BALANCE,
       tx: [{ t: Date.now(), label: 'Welcome credit', amt: START_BALANCE }],
       entries: {},   // compId -> [{x,y,t}]
+      credits: {},   // compId -> purchased tickets not yet placed
       closed: {},    // compId -> true (demo "finish" pressed)
       epoch: Date.now(),
     };
   }
   function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
   let state = load();
+  state.credits = state.credits || {};   // migrate pre-credits saves
 
   /* ---------- seeded rng (stable bot entries per competition) ---------- */
   function rng(seedStr) {
@@ -78,6 +80,7 @@ const API = (() => {
     v.closed = !!state.closed[c.id];
     v.closesAt = state.epoch + c.closesIn * 1000;
     v.myTickets = (state.entries[c.id] || []).length;
+    v.myCredits = state.credits[c.id] || 0;
     v.sold = c.sold + v.myTickets;
     return v;
   }
@@ -110,18 +113,33 @@ const API = (() => {
       return clone(state.entries[compId] || []);
     },
 
+    /* BOTB flow step 1 — buy tickets BEFORE the photo is revealed */
+    async buyTickets(compId, n) {
+      const c = compById(compId);
+      if (!c) throw new Error('Unknown competition');
+      if (state.closed[compId]) throw new Error('Competition is closed');
+      n = Math.max(1, Math.min(25, Math.floor(n)));
+      const cost = priceFor(n);
+      if (cost > state.balance) throw new Error('Insufficient balance');
+      state.balance = +(state.balance - cost).toFixed(2);
+      state.credits[compId] = (state.credits[compId] || 0) + n;
+      state.tx.push({ t: Date.now(), label: `${n} ticket${n > 1 ? 's' : ''} · ${c.title}`, amt: -cost });
+      save(state);
+      return { balance: state.balance, credits: state.credits[compId], cost };
+    },
+
+    /* step 2 — place the crosshairs the player already paid for */
     async submitEntry(compId, picks) {
       const c = compById(compId);
       if (!c) throw new Error('Unknown competition');
       if (state.closed[compId]) throw new Error('Competition is closed');
-      const cost = priceFor(picks.length);
-      if (cost > state.balance) throw new Error('Insufficient balance');
-      state.balance = +(state.balance - cost).toFixed(2);
-      state.tx.push({ t: Date.now(), label: `${picks.length} ticket${picks.length > 1 ? 's' : ''} · ${c.title}`, amt: -cost });
+      const credits = state.credits[compId] || 0;
+      if (picks.length > credits) throw new Error('Not enough tickets — buy more first');
+      state.credits[compId] = credits - picks.length;
       const list = state.entries[compId] || (state.entries[compId] = []);
       picks.forEach(p => list.push({ x: p.x, y: p.y, t: Date.now() }));
       save(state);
-      return { balance: state.balance, total: list.length, cost };
+      return { balance: state.balance, total: list.length, credits: state.credits[compId] };
     },
 
     /* demo control — "finish the guessing" to preview the after-state */

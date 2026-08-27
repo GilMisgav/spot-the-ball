@@ -202,7 +202,7 @@ async function viewHome(sportFilter) {
     <div class="sec-head"><h2>How it works</h2></div>
     <div class="how-grid">
       <div class="how-card"><div class="num">01</div><h3>Pick a moment</h3><p>Choose a competition. Every photo is a real frame of play with the ball digitally removed.</p></div>
-      <div class="how-card"><div class="num">02</div><h3>Place your crosshair</h3><p>Read the players — their eyes, their bodies, the geometry of the play. Drop up to 25 crosshairs per entry. More tickets, better odds, bigger discount.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Buy your tickets</h3><p>Choose your bundle before the photo is revealed — 1 to 25 crosshairs, bigger bundles cost less per pin. Then the moment unlocks.</p></div>
       <div class="how-card"><div class="num">03</div><h3>Judges decide</h3><p>When entries close, our panel of pros fixes the ball's true position. It's their judgement — not the original photo — that counts. Skill, not chance.</p></div>
       <div class="how-card"><div class="num">04</div><h3>Closest wins</h3><p>Nearest crosshair takes the headline prize. Every entry earns precision points toward the weekly tournament pot.</p></div>
     </div>
@@ -227,11 +227,14 @@ async function viewPlay(id) {
   if (!c) { location.hash = '#/'; return; }
   if (c.closed) { location.hash = `#/results/${id}`; return; }
   const submitted = await API.myEntries(id);
-  const s = SPORTS[c.sport];
-  let picks = [];   // unsubmitted crosshairs
+  // BOTB flow: the photo stays hidden until you hold tickets
+  if (c.myCredits > 0 || submitted.length > 0) return renderBoard(c, submitted);
+  return renderGate(c);
+}
 
-  app.innerHTML = `
-  <div class="play-wrap">
+function playTop(c) {
+  const s = SPORTS[c.sport];
+  return `
     <div class="play-top">
       <a class="back-link" href="#/">← All competitions</a>
       <div class="play-title">${esc(c.title)} <small>· ${s.icon} ${s.label}</small></div>
@@ -239,8 +242,129 @@ async function viewPlay(id) {
         <span class="pb">Closes in <b><span data-deadline="${c.closesAt}">${fmtLeft(c.closesAt - Date.now())}</span></b></span>
         <span class="pb">${c.sold.toLocaleString()} tickets in play</span>
       </div>
-    </div>
+    </div>`;
+}
 
+function prizeCard(c, tiles) {
+  return `
+    <div class="panel-card">
+      <div class="prize-line">
+        <span class="p-art">${c.prizeImg
+          ? `<img src="${c.prizeImg}" alt="">`
+          : (PRIZE_ART[c.prizeType] || PRIZE_ART.cash)}</span>
+        <div><div class="l">Headline prize</div><div class="v">${esc(c.prize)}</div></div>
+      </div>
+      <div class="count-tiles">${tiles}</div>
+    </div>`;
+}
+
+/* ----- step 1: buy tickets, photo hidden ----- */
+async function renderGate(c) {
+  let qty = 5;
+
+  app.innerHTML = `
+  <div class="play-wrap">
+    ${playTop(c)}
+    <div class="play-grid">
+      <div>
+        <div class="board-shell">
+          <div class="gate-board">
+            <svg class="plate-mark" viewBox="0 0 400 250" aria-hidden="true">
+              <circle cx="200" cy="125" r="70" fill="none" stroke="currentColor"/>
+              <circle cx="200" cy="125" r="110" fill="none" stroke="currentColor"/>
+              <circle cx="200" cy="125" r="150" fill="none" stroke="currentColor"/>
+              <line x1="200" y1="-20" x2="200" y2="270" stroke="currentColor"/>
+              <line x1="-20" y1="125" x2="420" y2="125" stroke="currentColor"/>
+            </svg>
+            <div class="gate-lock">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.6"/></svg>
+            </div>
+            <div class="gate-title">The moment stays hidden</div>
+            <div class="gate-sub">${esc(c.sub)}.<br>Buy your tickets first — the photo is revealed only once you hold crosshairs to place.</div>
+          </div>
+          <div class="board-hint">
+            <span><span class="k">STEP 1</span> — choose tickets · <span class="k">STEP 2</span> — the photo unlocks and you place your crosshairs</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        ${prizeCard(c, `
+          <div class="ct"><div class="n">${c.sold.toLocaleString()}</div><div class="l">In play</div></div>
+          <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>`)}
+
+        <div class="panel-card">
+          <h4>Choose your tickets <span class="mono">more pins · better odds</span></h4>
+          <div class="bundles" id="bundles">
+            ${[1, 5, 10, 25].map(n => `
+              <button class="bundle ${n === 5 ? 'sel' : ''}" data-n="${n}">
+                <b>${n}</b><span>ticket${n > 1 ? 's' : ''}</span>
+                <i>${money(API.priceFor(n))}</i>
+                <em>${n > 1 ? '$' + (API.priceFor(n) / n).toFixed(2) + '/ea' : 'single'}</em>
+              </button>`).join('')}
+          </div>
+          <div class="qty-row">
+            <span>Custom</span>
+            <div class="stepper">
+              <button id="qMinus">−</button><b id="qVal">5</b><button id="qPlus">+</button>
+            </div>
+          </div>
+          <div class="cost-row"><span>Total</span> <span><span class="save" id="saveNote"></span> <b id="costTotal">${money(API.priceFor(5))}</b></span></div>
+          <button class="btn big" id="buyBtn">Buy 5 tickets &amp; reveal the moment</button>
+        </div>
+
+        <div class="panel-card demo-card">
+          <h4>Demo control</h4>
+          <p>Skip the wait — close this competition now and see the reveal flow.</p>
+          <button class="btn ghost" id="finishBtn">⏭ End contest &amp; reveal result</button>
+        </div>
+      </aside>
+    </div>
+  </div>`;
+
+  refreshWallet().then(me => $('#tileBal').textContent = money(me.balance).replace('.00', ''));
+
+  function paint() {
+    $$('#bundles .bundle').forEach(b => b.classList.toggle('sel', +b.dataset.n === qty));
+    $('#qVal').textContent = qty;
+    const cost = API.priceFor(qty);
+    $('#costTotal').textContent = money(cost);
+    const full = qty * 3.0;
+    $('#saveNote').textContent = full > cost ? `save ${money(full - cost)}` : '';
+    $('#buyBtn').textContent = `Buy ${qty} ticket${qty > 1 ? 's' : ''} & reveal the moment`;
+  }
+  $$('#bundles .bundle').forEach(b => b.addEventListener('click', () => { qty = +b.dataset.n; paint(); }));
+  $('#qMinus').addEventListener('click', () => { qty = Math.max(1, qty - 1); paint(); });
+  $('#qPlus').addEventListener('click', () => { qty = Math.min(25, qty + 1); paint(); });
+
+  $('#buyBtn').addEventListener('click', async () => {
+    try {
+      const res = await API.buyTickets(c.id, qty);
+      await refreshWallet(true);
+      toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
+      route();   // re-enter play → board is now unlocked
+    } catch (err) {
+      if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
+      else toast(err.message, true);
+    }
+  });
+
+  $('#finishBtn').addEventListener('click', async () => {
+    await API.closeCompetition(c.id);
+    location.hash = `#/results/${c.id}`;
+  });
+
+  liveCountdowns();
+}
+
+/* ----- step 2: the photo is unlocked, place your paid crosshairs ----- */
+async function renderBoard(c, submitted) {
+  let picks = [];              // staged, not yet locked
+  let credits = c.myCredits;   // paid crosshairs in hand
+
+  app.innerHTML = `
+  <div class="play-wrap">
+    ${playTop(c)}
     <div class="play-grid">
       <div>
         <div class="board-shell">
@@ -252,33 +376,31 @@ async function viewPlay(id) {
             <div class="loupe"></div>
           </div>
           <div class="board-hint">
-            <span><span class="k">AIM</span> — move to inspect with the loupe · <span class="k">CLICK</span> — drop a crosshair · click a pin to remove it</span>
+            <span><span class="k">AIM</span> — move to inspect with the loupe · <span class="k">CLICK</span> — place a paid crosshair · click a pin to take it back</span>
             <span>${esc(c.sub)}</span>
           </div>
         </div>
       </div>
 
       <aside class="panel">
-        <div class="panel-card">
-          <div class="prize-line">
-            <span class="p-art">${c.prizeImg
-              ? `<img src="${c.prizeImg}" alt="">`
-              : (PRIZE_ART[c.prizeType] || PRIZE_ART.cash)}</span>
-            <div><div class="l">Headline prize</div><div class="v">${esc(c.prize)}</div></div>
-          </div>
-          <div class="count-tiles">
-            <div class="ct"><div class="n" id="tileNew">0</div><div class="l">New picks</div></div>
-            <div class="ct"><div class="n" id="tileSub">${submitted.length}</div><div class="l">Submitted</div></div>
-            <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>
-          </div>
-        </div>
+        ${prizeCard(c, `
+          <div class="ct"><div class="n" id="tileLeft">0</div><div class="l">In hand</div></div>
+          <div class="ct"><div class="n" id="tileSub">${submitted.length}</div><div class="l">Locked</div></div>
+          <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>`)}
 
         <div class="panel-card">
           <h4>Your crosshairs <span class="mono" id="pickCount"></span></h4>
           <div class="picks" id="picksList"></div>
-          <div class="cost-row"><span>Entry cost</span> <span><span class="save" id="saveNote"></span> <b id="costTotal">$0.00</b></span></div>
-          <button class="btn big" id="submitBtn" disabled>Submit entry</button>
-          <div class="tier-hint">Bundles: 1× $3.00 · 5× <em>$2.40/ea</em> · 10× <em>$2.10/ea</em> · 25× <em>$1.80/ea</em></div>
+          <button class="btn big" id="submitBtn" disabled>Lock in entry</button>
+          <div class="tier-hint">Already paid — locking costs nothing. Unplaced tickets stay in hand.</div>
+        </div>
+
+        <div class="panel-card">
+          <h4>Add tickets</h4>
+          <div class="qty-row" style="margin-top:0">
+            <div class="stepper"><button id="aMinus">−</button><b id="aVal">5</b><button id="aPlus">+</button></div>
+            <button class="btn ghost" id="addBtn" style="width:auto;margin:0;padding:10px 16px">Add · ${money(API.priceFor(5))}</button>
+          </div>
         </div>
 
         <div class="panel-card demo-card">
@@ -293,24 +415,20 @@ async function viewPlay(id) {
   const board = $('#board'), img = $('img', board);
   const loupe = $('.loupe', board), coords = $('.coords', board), reticle = $('.reticle', board);
   const hairV = $('.hairV', board), hairH = $('.hairH', board);
+  let addQty = 5;
 
   refreshWallet().then(me => $('#tileBal').textContent = money(me.balance).replace('.00', ''));
 
-  /* pins render */
   function renderPins() {
     $$('.pin', board).forEach(p => p.remove());
     submitted.forEach((p, i) => board.appendChild(pinEl(p, i + 1, true)));
     picks.forEach((p, i) => board.appendChild(pinEl(p, submitted.length + i + 1, false)));
     const n = picks.length;
-    $('#tileNew').textContent = n;
+    $('#tileLeft').textContent = credits - n;
     $('#tileSub').textContent = submitted.length;
-    $('#pickCount').textContent = `${n + submitted.length}/25`;
-    const cost = API.priceFor(n);
-    $('#costTotal').textContent = money(cost);
-    const full = n * PRICE_TIERS[PRICE_TIERS.length - 1].each;
-    $('#saveNote').textContent = full > cost ? `save ${money(full - cost)}` : '';
+    $('#pickCount').textContent = `${credits - n} left to place`;
     $('#submitBtn').disabled = n === 0;
-    $('#submitBtn').textContent = n ? `Submit ${n} ticket${n > 1 ? 's' : ''} · ${money(cost)}` : 'Submit entry';
+    $('#submitBtn').textContent = n ? `Lock in ${n} crosshair${n > 1 ? 's' : ''}` : 'Lock in entry';
     $('#picksList').innerHTML = [
       ...submitted.map((p, i) => `<div class="pick-row submitted"><span class="idx">${i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><span class="lock">✓ locked</span></div>`),
       ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><button class="del" data-del="${i}">×</button></div>`),
@@ -329,7 +447,6 @@ async function viewPlay(id) {
     return el;
   }
 
-  /* aiming: hairlines + loupe */
   const LZ = 2.6, LS = 150;
   function aim(e) {
     const r = board.getBoundingClientRect();
@@ -340,7 +457,6 @@ async function viewPlay(id) {
     reticle.style.left = cx + 'px'; reticle.style.top = cy + 'px';
     coords.style.left = cx + 'px'; coords.style.top = cy + 'px';
     coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`;
-    // loupe: keep inside board, offset away from cursor
     const lx = cx + (cx > r.width - 190 ? -LS - 26 : 26);
     const ly = cy + (cy > r.height - 190 ? -LS - 26 : 26);
     loupe.style.left = lx + 'px'; loupe.style.top = ly + 'px';
@@ -351,23 +467,39 @@ async function viewPlay(id) {
   board.addEventListener('mousemove', aim);
   board.addEventListener('mouseleave', () => board.classList.remove('aiming'));
   board.addEventListener('click', e => {
+    if (picks.length >= credits) { toast('No tickets left in hand — add more below', true); return; }
     const r = board.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width * 100;
     const y = (e.clientY - r.top) / r.height * 100;
-    if (picks.length + submitted.length >= 25) { toast('Max 25 crosshairs per player on one board', true); return; }
     picks.push({ x: +x.toFixed(2), y: +y.toFixed(2) });
     renderPins();
   });
 
   $('#submitBtn').addEventListener('click', async () => {
     try {
-      const res = await API.submitEntry(id, picks);
+      const res = await API.submitEntry(c.id, picks);
       submitted.push(...picks.map(p => ({ ...p })));
       picks = [];
+      credits = res.credits;
       renderPins();
+      toast(`Entry locked — ${res.total} crosshair${res.total > 1 ? 's' : ''} on this board. Good luck! 🎯`);
+    } catch (err) { toast(err.message, true); }
+  });
+
+  function paintAdd() {
+    $('#aVal').textContent = addQty;
+    $('#addBtn').textContent = `Add · ${money(API.priceFor(addQty))}`;
+  }
+  $('#aMinus').addEventListener('click', () => { addQty = Math.max(1, addQty - 1); paintAdd(); });
+  $('#aPlus').addEventListener('click', () => { addQty = Math.min(25, addQty + 1); paintAdd(); });
+  $('#addBtn').addEventListener('click', async () => {
+    try {
+      const res = await API.buyTickets(c.id, addQty);
+      credits = res.credits;
       await refreshWallet(true);
       $('#tileBal').textContent = money(res.balance).replace('.00', '');
-      toast(`Entry locked in — ${res.total} ticket${res.total > 1 ? 's' : ''} on this board. Good luck! 🎯`);
+      renderPins();
+      toast(`+${addQty} ticket${addQty > 1 ? 's' : ''} added to your hand`);
     } catch (err) {
       if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
       else toast(err.message, true);
@@ -375,9 +507,9 @@ async function viewPlay(id) {
   });
 
   $('#finishBtn').addEventListener('click', async () => {
-    if (picks.length) { toast('Submit or remove your pending crosshairs first', true); return; }
-    await API.closeCompetition(id);
-    location.hash = `#/results/${id}`;
+    if (picks.length) { toast('Lock in or remove your placed crosshairs first', true); return; }
+    await API.closeCompetition(c.id);
+    location.hash = `#/results/${c.id}`;
   });
 
   renderPins();
@@ -398,6 +530,25 @@ async function viewResults(id) {
     : podium
       ? (myRank === 1 ? 'You nailed it!' : `Podium finish — P${myRank}!`)
       : myRank <= 10 ? 'So close. Top ten.' : 'The judges have ruled';
+
+  /* standings: always show where YOU are — top 3, then the window around your rank */
+  const rowHtml = r => `
+    <tr class="${r.me ? 'me' : ''} ${r.rank <= 3 ? 'podium' : ''}">
+      <td class="r">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td>
+      <td class="name">${esc(r.name)}${r.me ? ' <span class="you-chip">YOU</span>' : ''}</td>
+      <td class="d">${r.d.toFixed(2)}</td>
+      <td class="pts">${r.score}</td>
+    </tr>`;
+  const gapRow = `<tr class="gap"><td colspan="4">···</td></tr>`;
+  let standingsHtml;
+  if (!played || myRank <= 10) {
+    standingsHtml = rows.slice(0, 12).map(rowHtml).join('');
+  } else {
+    const around = rows.slice(Math.max(3, myRank - 3), Math.min(rows.length, myRank + 2));
+    standingsHtml = rows.slice(0, 3).map(rowHtml).join('')
+      + gapRow + around.map(rowHtml).join('')
+      + (myRank + 2 < rows.length ? gapRow : '');
+  }
 
   app.innerHTML = `
   <div class="play-wrap">
@@ -450,19 +601,7 @@ async function viewResults(id) {
           <h4 style="padding:12px 14px 0">Final standings <span class="mono">closest wins</span></h4>
           <table class="lb">
             <thead><tr><th>#</th><th>Player</th><th>Dist</th><th style="text-align:right">Pts</th></tr></thead>
-            <tbody>
-              ${rows.slice(0, 12).map(r => `
-                <tr class="${r.me ? 'me' : ''} ${r.rank <= 3 ? 'podium' : ''}">
-                  <td class="r">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</td>
-                  <td class="name">${esc(r.name)}</td>
-                  <td class="d">${r.d.toFixed(2)}</td>
-                  <td class="pts">${r.score}</td>
-                </tr>`).join('')}
-              ${myRank > 12 ? `
-                <tr><td colspan="4" style="text-align:center;color:var(--text-faint)">···</td></tr>
-                <tr class="me"><td class="r">${myRank}</td><td class="name">Gil M. (you)</td>
-                <td class="d">${myBest.d.toFixed(2)}</td><td class="pts">${myBest.score}</td></tr>` : ''}
-            </tbody>
+            <tbody>${standingsHtml}</tbody>
           </table>
         </div>
         ${played ? `
@@ -482,9 +621,10 @@ async function viewResults(id) {
   const rb = $('#resBoard');
   mine.forEach((p, i) => {
     const el = document.createElement('div');
-    el.className = 'pin' + (i === 0 ? '' : ' submitted');
+    el.className = 'pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
-    el.innerHTML = `<span class="c"></span><span class="d"></span><span class="n">${i + 1}</span>`;
+    el.innerHTML = `<span class="c"></span><span class="d"></span>
+      <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
   });
   if (myBest) {
@@ -583,7 +723,7 @@ async function viewHow() {
     <p class="lead">Spot the Ball is a game of judgement — legally and philosophically the opposite of a lottery. Here's the full loop, exactly as the production build will run it.</p>
     <div class="how-grid" style="grid-template-columns:1fr">
       <div class="how-card"><div class="num">01</div><h3>The moment</h3><p>We license a professional sports photograph and digitally remove the ball. Nothing else in the frame is touched.</p></div>
-      <div class="how-card"><div class="num">02</div><h3>Your read</h3><p>Study eye-lines, body shape and physics. Use the loupe for millimetre placement, drop up to 25 crosshairs, and pay only for what you place — bundle discounts apply automatically.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Buy, then aim</h3><p>Tickets are bought blind — the photo stays hidden until you hold crosshairs to place. Then study eye-lines, body shape and physics, and use the loupe for millimetre placement.</p></div>
       <div class="how-card"><div class="num">03</div><h3>The panel</h3><p>After entries close, a panel of former pros studies the frame and fixes the definitive ball position. The judges' ball — not the original photo — is the target. That's what keeps it 100% skill.</p></div>
       <div class="how-card"><div class="num">04</div><h3>Scoring</h3><p>Each pin earns <b>1000 · e<sup>−d/9</sup></b> points, where d is the distance to the judges' ball in board units. Closest single pin takes the headline prize; your best pin per contest feeds the weekly tournament pot.</p></div>
       <div class="how-card"><div class="num">05</div><h3>The wallet</h3><p>Top up, enter, withdraw winnings. In this demo the balance is simulated — the production app plugs a real PSP into the exact same API surface.</p></div>
