@@ -9,6 +9,14 @@ const app = $('#app');
 const money = n => '$' + n.toFixed(2);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+addEventListener('error', e => {
+  const t = e.target;
+  if (t && t.tagName === 'IMG' && !t.dataset.retried) {
+    t.dataset.retried = '1';
+    setTimeout(() => { t.src = t.src.split('?')[0] + '?r=' + Date.now(); }, 800);
+  }
+}, true);
+
 let tickTimers = [];
 function clearTicks() { tickTimers.forEach(clearInterval); tickTimers = []; }
 
@@ -119,7 +127,7 @@ function compCard(c) {
         ? `<span class="cc-flag closed">RESULTS IN</span>`
         : c.featured ? `<span class="cc-flag">FEATURED</span>` : ''}
       ${c.prizeImg
-        ? `<img class="cc-photo" src="${c.prizeImg}" alt="${esc(c.prize)}" loading="lazy">`
+        ? `<img class="cc-photo" src="${c.prizeImg}" alt="${esc(c.prize)}">`
         : `<div class="cc-art">${PRIZE_ART[c.prizeType] || PRIZE_ART.cash}</div>`}
       <div class="cc-prize">
         <div class="p-label">Win</div>
@@ -170,7 +178,7 @@ async function viewHome(sportFilter) {
 
   <div class="moments" aria-hidden="true">
     <div class="m-track">
-      ${[...comps, ...comps].map(c => `<div class="m-cell"><img src="${c.img}" alt="" loading="lazy"><span>${SPORTS[c.sport].icon} ${esc(c.title)}</span></div>`).join('')}
+      ${[...comps, ...comps].map(c => `<div class="m-cell"><img src="${c.img}" alt=""><span>${SPORTS[c.sport].icon} ${esc(c.title)}</span></div>`).join('')}
     </div>
     <div class="m-caption">This week's frozen moments — the ball is out there</div>
   </div>
