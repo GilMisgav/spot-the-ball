@@ -1,3 +1,566 @@
+/* Spot the Ball — generated bundle. Edit js/*.js, then run ./build.sh */
+/* ============================================================
+   SPOTTED.club — demo data layer
+   Everything the future backend will own lives in this file:
+   sports, competitions, judge targets, pricing tiers, bots.
+   ============================================================ */
+
+const SPORTS = {
+  soccer:     { label: 'Soccer',     icon: '⚽', hue: 145, accent: '#3ddc84' },
+  football:   { label: 'Football',   icon: '🏈', hue: 22,  accent: '#ff7a3d' },
+  basketball: { label: 'Basketball', icon: '🏀', hue: 36,  accent: '#ffb03a' },
+};
+
+/* Ticket pricing — BOTB-style bundle discount (server-authoritative later) */
+const PRICE_TIERS = [
+  { min: 25, each: 1.80 },
+  { min: 10, each: 2.10 },
+  { min: 5,  each: 2.40 },
+  { min: 1,  each: 3.00 },
+];
+function priceFor(n) {
+  if (n <= 0) return 0;
+  const tier = PRICE_TIERS.find(t => n >= t.min);
+  return +(n * tier.each).toFixed(2);
+}
+
+/* target = judges' ball centre, in % of image width/height */
+const COMPETITIONS = [
+  // ---------------- SOCCER ----------------
+  {
+    id: 'sc-freekick', sport: 'soccer', img: 'assets/img/soccer-1.jpg', landscape: true,
+    title: 'The Wall', sub: 'World Cup qualifier · set-piece chaos in the box',
+    prize: '$50,000 Cash', prizeShort: '$50K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-roll.jpg', fee: 3.0,
+    closesIn: 2 * 3600 + 14 * 60, sold: 8412, cap: 12000,
+    target: { x: 9.9, y: 50.4 }, ballSize: 4.3, ballImg: 'assets/balls/sc-freekick.png', ballW: 9.46,
+  },
+  {
+    id: 'sc-eldiez', sport: 'soccer', img: 'assets/img/soccer-2.jpg', landscape: true,
+    title: 'El Diez', sub: 'The №10 strikes — keeper at full flight',
+    prize: 'VIP World Cup Final · Trip for 2', prizeShort: 'WC FINAL ×2', prizeType: 'trip', prizeImg: 'assets/prizes/worldcup-trophy.jpg', fee: 3.0,
+    closesIn: 5 * 3600 + 42 * 60, sold: 10930, cap: 15000, featured: true,
+    target: { x: 14.0, y: 77.3 }, ballSize: 5.6, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
+  },
+  {
+    id: 'sc-stretch', sport: 'soccer', img: 'assets/img/soccer-3.jpg', landscape: true,
+    title: 'Full Stretch', sub: 'Beaten at the near post? You be the judge',
+    prize: 'Rolex Day-Date Platinum', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex.jpg', fee: 2.5,
+    closesIn: 9 * 3600 + 5 * 60, sold: 3204, cap: 8000,
+    target: { x: 22.6, y: 82.6 }, ballSize: 8.4, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
+  },
+  {
+    id: 'sc-slide', sport: 'soccer', img: 'assets/img/soccer-4.jpg', landscape: true,
+    title: 'The Slide', sub: 'Last-ditch block on the edge of the area',
+    prize: 'AirPods Max', prizeShort: 'AIRPODS MAX', prizeType: 'phone', prizeImg: 'assets/prizes/airpods.jpg', fee: 3.0,
+    closesIn: 26 * 3600, sold: 5127, cap: 10000,
+    target: { x: 18.4, y: 72.2 }, ballSize: 6.6, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
+  },
+  {
+    id: 'sc-firsttouch', sport: 'soccer', img: 'assets/img/soccer-5.jpg', landscape: true,
+    title: 'First Touch', sub: 'Cross whipped in — who gets there first?',
+    prize: 'Tesla Model Y', prizeShort: 'TESLA', prizeType: 'car', prizeImg: 'assets/prizes/tesla.jpg', fee: 3.5,
+    closesIn: 49 * 3600, sold: 1980, cap: 14000,
+    target: { x: 46.1, y: 20.0 }, ballSize: 5.4, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
+  },
+  // ---------------- FOOTBALL ----------------
+  {
+    id: 'fb-pocket', sport: 'football', img: 'assets/img/football-1.jpg', landscape: true,
+    title: 'Pocket Pressure', sub: 'Release under the rush — follow the spiral',
+    prize: '$100,000 Cash', prizeShort: '$100K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-100s.jpg', fee: 3.5,
+    closesIn: 3 * 3600 + 31 * 60, sold: 14208, cap: 20000, featured: true,
+    target: { x: 71.9, y: 9.5 }, ballSize: 10.0, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
+  },
+  {
+    id: 'fb-fourthdown', sport: 'football', img: 'assets/img/football-2.jpg', landscape: true,
+    title: 'Fourth Down', sub: 'The pass breakup that decided the bowl',
+    prize: 'Super Bowl Suite for 4', prizeShort: 'SB SUITE ×4', prizeType: 'suite', prizeImg: 'assets/prizes/stadium-tunnel.jpg', fee: 3.0,
+    closesIn: 12 * 3600 + 18 * 60, sold: 6741, cap: 16000,
+    target: { x: 44.4, y: 46.7 }, ballSize: 8.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
+  },
+  {
+    id: 'fb-looseball', sport: 'football', img: 'assets/img/football-3.jpg', landscape: true,
+    title: 'Loose Ball', sub: 'Fumble! Every eye on the turf',
+    prize: 'Rolex Day-Date Everose', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex-everose.jpg', fee: 2.5,
+    closesIn: 31 * 3600, sold: 2456, cap: 9000,
+    target: { x: 57.6, y: 86.7 }, ballSize: 7.0, ballInPhoto: true,
+  },
+  // ---------------- BASKETBALL ----------------
+  {
+    id: 'bb-topkey', sport: 'basketball', img: 'assets/img/basketball-1.jpg', landscape: true,
+    title: 'Top of the Key', sub: 'Bird\'s-eye over the rim — swish or rattle?',
+    prize: 'Courtside Season Tickets', prizeShort: 'COURTSIDE', prizeType: 'courtside', prizeImg: 'assets/prizes/courtside.jpg', fee: 3.0,
+    closesIn: 4 * 3600 + 3 * 60, sold: 7311, cap: 12000,
+    target: { x: 46.5, y: 87.8 }, ballSize: 9.1, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
+  },
+  {
+    id: 'bb-rimrunner', sport: 'basketball', img: 'assets/img/basketball-2.jpg', landscape: true,
+    title: 'Rim Runner', sub: 'Traffic in the paint, first half fire',
+    prize: 'Framed Signed Kobe Jersey', prizeShort: 'KOBE 24', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-kobe.jpg', fee: 3.0,
+    closesIn: 8 * 3600 + 47 * 60, sold: 4102, cap: 10000,
+    target: { x: 48.8, y: 10.0 }, ballSize: 8.6, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
+  },
+  {
+    id: 'bb-elevation', sport: 'basketball', img: 'assets/img/basketball-3.jpg', landscape: false,
+    title: 'Elevation', sub: 'Two bigs, one ball, nine thousand eyes',
+    prize: 'NBA Finals Trip for 2', prizeShort: 'FINALS ×2', prizeType: 'trip', prizeImg: 'assets/prizes/nba-finals.jpg', fee: 3.5,
+    closesIn: 22 * 3600, sold: 5820, cap: 13000, featured: true,
+    target: { x: 48.1, y: 7.0 }, ballSize: 5.0, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
+  },
+  {
+    id: 'bb-denied', sport: 'basketball', img: 'assets/img/basketball-4.jpg', landscape: false,
+    title: 'Denied', sub: 'Double block at the summit',
+    prize: 'Signed Deni Avdija Jersey', prizeShort: 'AVDIJA 8', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-avdija.jpg', fee: 2.5,
+    closesIn: 54 * 3600, sold: 1210, cap: 8000,
+    target: { x: 59.0, y: 8.6 }, ballSize: 11.1, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
+  },
+];
+
+/* Bot entrants — deterministic per competition (seeded), so results are stable */
+const BOT_NAMES = [
+  'HawkeyeDan', 'Mia_K', 'PitchPerfect', 'CrossbarCarl', 'LensQueen', 'ZoneReader',
+  'TopBinsTara', 'StatMan88', 'EagleEyeEli', 'NoLookNina', 'GlassCleaner', 'PixelHunter',
+  'SidelineSam', 'FoxInTheBox', 'RadarRay', 'SwishSofia', 'BlitzBecca', 'GoalLineGus',
+  'CourtVision', 'SnapCountSue', 'VARveteran', 'DeepRouteDrew', 'PaintPatrol', 'CleanSheetKay',
+];
+
+/* Weekly tournament config */
+const TOURNAMENT = {
+  name: 'Golden Crosshair — Week 33',
+  pool: '$25,000',
+  tiers: [
+    { place: '1st', prize: '$10,000' },
+    { place: '2nd', prize: '$5,000' },
+    { place: '3rd', prize: '$2,500' },
+    { place: '4th–10th', prize: '$1,000' },
+    { place: '11th–25th', prize: '$50 credit' },
+  ],
+  endsIn: 3 * 24 * 3600 + 11 * 3600,
+};
+
+/* Past winners strip (flavour) */
+const PAST_WINNERS = [
+  { name: 'Ally M.', from: 'Manchester', prize: 'Porsche 911 Carrera', week: 'W29' },
+  { name: 'Dev P.', from: 'Austin', prize: '$75,000 Cash', week: 'W30' },
+  { name: 'Sofia R.', from: 'Madrid', prize: 'World Cup Final Trip', week: 'W31' },
+  { name: 'Ken W.', from: 'Toronto', prize: 'Courtside Tickets + $10K', week: 'W32' },
+];
+/* ============================================================
+   Spot the Ball — prize artwork
+   Elegant gold line-art SVGs, one per prize type.
+   Shared gradient id "auG" — identical defs in every svg.
+   ============================================================ */
+
+const PRIZE_ART = (() => {
+  const DEFS = `<defs>
+    <linearGradient id="auG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd98a"/><stop offset=".55" stop-color="#f2b24b"/><stop offset="1" stop-color="#b97f22"/>
+    </linearGradient>
+    <linearGradient id="auV" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd98a"/><stop offset="1" stop-color="#b97f22"/>
+    </linearGradient>
+  </defs>`;
+  const wrap = inner =>
+    `<svg viewBox="0 0 240 170" fill="none" xmlns="http://www.w3.org/2000/svg">${DEFS}${inner}</svg>`;
+
+  /* ---- Rolex-style dive watch ---- */
+  const watch = wrap(`
+    <g stroke="url(#auG)" stroke-width="3">
+      <path d="M96 32 h48 l-4 -22 h-40 z" fill="rgba(242,178,75,.10)"/>
+      <path d="M96 138 h48 l-4 22 h-40 z" fill="rgba(242,178,75,.10)"/>
+      <line x1="104" y1="10" x2="104" y2="32"/><line x1="120" y1="10" x2="120" y2="32"/><line x1="136" y1="10" x2="136" y2="32"/>
+      <line x1="104" y1="160" x2="104" y2="138"/><line x1="120" y1="160" x2="120" y2="138"/><line x1="136" y1="160" x2="136" y2="138"/>
+    </g>
+    <circle cx="120" cy="85" r="46" fill="rgba(10,13,19,.85)" stroke="url(#auG)" stroke-width="4"/>
+    <circle cx="120" cy="85" r="46" stroke="url(#auG)" stroke-width="7" stroke-dasharray="2 8.05" opacity=".9"/>
+    <circle cx="120" cy="85" r="34" fill="#0c1018" stroke="url(#auG)" stroke-width="1.4"/>
+    <g fill="url(#auG)">
+      <circle cx="120" cy="57" r="2.6"/><circle cx="120" cy="113" r="2.6"/><circle cx="92" cy="85" r="2.6"/><circle cx="148" cy="85" r="2.6"/>
+      <circle cx="100" cy="65" r="1.9"/><circle cx="140" cy="65" r="1.9"/><circle cx="100" cy="105" r="1.9"/><circle cx="140" cy="105" r="1.9"/>
+    </g>
+    <g stroke="url(#auG)" stroke-linecap="round">
+      <line x1="120" y1="85" x2="120" y2="62" stroke-width="3.4"/>
+      <line x1="120" y1="85" x2="138" y2="94" stroke-width="2.6"/>
+    </g>
+    <circle cx="120" cy="85" r="3" fill="#ffd98a"/>
+    <rect x="169" y="79" width="9" height="12" rx="3" fill="rgba(242,178,75,.25)" stroke="url(#auG)" stroke-width="2"/>`);
+
+  /* ---- iPhone + AirPods Max ---- */
+  const phone = wrap(`
+    <path d="M60 52 a52 52 0 0 1 104 0" stroke="url(#auG)" stroke-width="5" fill="none"/>
+    <rect x="46" y="52" width="26" height="40" rx="12" fill="rgba(242,178,75,.14)" stroke="url(#auG)" stroke-width="3"/>
+    <rect x="152" y="52" width="26" height="40" rx="12" fill="rgba(242,178,75,.14)" stroke="url(#auG)" stroke-width="3"/>
+    <rect x="83" y="42" width="74" height="122" rx="16" fill="#0c1018" stroke="url(#auG)" stroke-width="3.4"/>
+    <rect x="90" y="49" width="60" height="108" rx="10" fill="rgba(242,178,75,.05)" stroke="rgba(242,178,75,.35)" stroke-width="1"/>
+    <rect x="105" y="55" width="30" height="9" rx="4.5" fill="rgba(242,178,75,.5)"/>
+    <g stroke="rgba(255,217,138,.75)" stroke-width="1.6">
+      <circle cx="120" cy="104" r="15"/>
+      <line x1="120" y1="83" x2="120" y2="95"/><line x1="120" y1="113" x2="120" y2="125"/>
+      <line x1="99" y1="104" x2="111" y2="104"/><line x1="129" y1="104" x2="141" y2="104"/>
+    </g>
+    <circle cx="120" cy="104" r="2.6" fill="#ffd98a"/>`);
+
+  /* ---- cash stack ---- */
+  const cash = wrap(`
+    <rect x="52" y="88" width="136" height="44" rx="8" fill="rgba(242,178,75,.07)" stroke="url(#auG)" stroke-width="2.4" transform="rotate(-3 120 110)"/>
+    <rect x="48" y="70" width="144" height="46" rx="8" fill="rgba(242,178,75,.10)" stroke="url(#auG)" stroke-width="2.7" transform="rotate(2 120 93)"/>
+    <rect x="46" y="48" width="148" height="50" rx="9" fill="#0d1119" stroke="url(#auG)" stroke-width="3.2"/>
+    <ellipse cx="120" cy="73" rx="26" ry="17" fill="rgba(242,178,75,.12)" stroke="url(#auG)" stroke-width="2.4"/>
+    <text x="120" y="80" text-anchor="middle" font-family="Georgia,serif" font-size="21" font-weight="700" fill="url(#auV)">$</text>
+    <g stroke="rgba(242,178,75,.55)" stroke-width="1.6">
+      <line x1="58" y1="60" x2="72" y2="60"/><line x1="58" y1="86" x2="72" y2="86"/>
+      <line x1="168" y1="60" x2="182" y2="60"/><line x1="168" y1="86" x2="182" y2="86"/>
+    </g>
+    <rect x="96" y="118" width="48" height="26" rx="5" fill="rgba(242,178,75,.16)" stroke="url(#auG)" stroke-width="2.4"/>
+    <text x="120" y="137" text-anchor="middle" font-family="Georgia,serif" font-size="15" font-weight="700" fill="#ffd98a">$$$</text>`);
+
+  /* ---- luxury SUV ---- */
+  const car = wrap(`
+    <path d="M34 108 l10 -26 q3 -8 12 -9 l28 -3 26 -16 q5 -3 12 -3 h30 q26 2 44 20 l10 10 q6 2 6 10 v14 q0 7 -8 7 h-10"
+      fill="rgba(242,178,75,.07)" stroke="url(#auG)" stroke-width="3.4" stroke-linejoin="round"/>
+    <path d="M150 112 h-56" stroke="url(#auG)" stroke-width="3.4"/>
+    <path d="M40 112 h8" stroke="url(#auG)" stroke-width="3.4"/>
+    <path d="M118 55 l-24 15 h44 l-4 -15 z" fill="rgba(242,178,75,.14)" stroke="url(#auG)" stroke-width="2"/>
+    <path d="M148 56 q20 2 32 15 h-30 z" fill="rgba(242,178,75,.14)" stroke="url(#auG)" stroke-width="2"/>
+    <circle cx="72" cy="112" r="17" fill="#0c1018" stroke="url(#auG)" stroke-width="3.4"/>
+    <circle cx="172" cy="112" r="17" fill="#0c1018" stroke="url(#auG)" stroke-width="3.4"/>
+    <g stroke="rgba(255,217,138,.8)" stroke-width="1.6">
+      <circle cx="72" cy="112" r="7"/><circle cx="172" cy="112" r="7"/>
+      <line x1="72" y1="105" x2="72" y2="119"/><line x1="65" y1="112" x2="79" y2="112"/>
+      <line x1="172" y1="105" x2="172" y2="119"/><line x1="165" y1="112" x2="179" y2="112"/>
+    </g>
+    <line x1="196" y1="96" x2="206" y2="96" stroke="url(#auG)" stroke-width="2.4"/>`);
+
+  /* ---- VIP trip: plane + boarding pass ---- */
+  const trip = wrap(`
+    <path d="M30 118 q60 -58 150 -80" stroke="rgba(242,178,75,.5)" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round"/>
+    <g transform="translate(150 30) rotate(14)">
+      <path d="M0 14 l52 -14 -38 30 -8 -6 -12 14 -4 -3 8 -16 z" fill="rgba(242,178,75,.16)" stroke="url(#auG)" stroke-width="2.6" stroke-linejoin="round"/>
+    </g>
+    <g transform="rotate(-6 120 122)">
+      <rect x="58" y="96" width="124" height="52" rx="9" fill="#0d1119" stroke="url(#auG)" stroke-width="3"/>
+      <line x1="142" y1="96" x2="142" y2="148" stroke="url(#auG)" stroke-width="2" stroke-dasharray="4 5"/>
+      <text x="70" y="116" font-family="Georgia,serif" font-size="12" letter-spacing="2" fill="#ffd98a">VIP</text>
+      <g stroke="rgba(242,178,75,.6)" stroke-width="2">
+        <line x1="70" y1="126" x2="128" y2="126"/><line x1="70" y1="135" x2="112" y2="135"/>
+      </g>
+      <g stroke="rgba(255,217,138,.85)" stroke-width="2">
+        <line x1="150" y1="104" x2="150" y2="140"/><line x1="156" y1="104" x2="156" y2="140"/>
+        <line x1="163" y1="104" x2="163" y2="140"/><line x1="171" y1="104" x2="171" y2="140"/>
+      </g>
+    </g>
+    <path d="M196 62 l3.5 7.5 8 1 -6 5.6 1.6 8 -7.1 -4.2 -7.1 4.2 1.6 -8 -6 -5.6 8 -1 z" fill="url(#auG)"/>`);
+
+  /* ---- stadium suite ---- */
+  const suite = wrap(`
+    <path d="M32 96 a88 42 0 0 1 176 0" stroke="url(#auG)" stroke-width="3.2" fill="none"/>
+    <path d="M52 96 a68 32 0 0 1 136 0" stroke="rgba(242,178,75,.6)" stroke-width="2.2" fill="none"/>
+    <path d="M72 96 a48 22 0 0 1 96 0" stroke="rgba(242,178,75,.4)" stroke-width="1.8" fill="none"/>
+    <rect x="94" y="84" width="52" height="26" rx="4" fill="rgba(61,220,132,.10)" stroke="url(#auG)" stroke-width="2"/>
+    <line x1="120" y1="84" x2="120" y2="110" stroke="rgba(242,178,75,.55)" stroke-width="1.6"/>
+    <circle cx="120" cy="97" r="6" stroke="rgba(242,178,75,.55)" stroke-width="1.6" fill="none"/>
+    <g transform="rotate(-5 120 132)">
+      <rect x="72" y="118" width="96" height="34" rx="7" fill="#0d1119" stroke="url(#auG)" stroke-width="2.8"/>
+      <circle cx="72" cy="135" r="5" fill="#0a0d13" stroke="url(#auG)" stroke-width="2"/>
+      <circle cx="168" cy="135" r="5" fill="#0a0d13" stroke="url(#auG)" stroke-width="2"/>
+      <text x="120" y="140" text-anchor="middle" font-family="Georgia,serif" font-size="13" letter-spacing="3" fill="#ffd98a">SUITE</text>
+    </g>
+    <path d="M120 30 l2.8 6 6.5 .8 -4.8 4.5 1.3 6.4 -5.8 -3.4 -5.8 3.4 1.3 -6.4 -4.8 -4.5 6.5 -.8 z" fill="url(#auG)"/>`);
+
+  /* ---- courtside: hoop + ticket ---- */
+  const courtside = wrap(`
+    <rect x="76" y="26" width="88" height="58" rx="5" fill="rgba(242,178,75,.06)" stroke="url(#auG)" stroke-width="3"/>
+    <rect x="103" y="46" width="34" height="26" rx="3" stroke="rgba(242,178,75,.6)" stroke-width="2" fill="none"/>
+    <ellipse cx="120" cy="86" rx="24" ry="7" fill="none" stroke="url(#auG)" stroke-width="3.4"/>
+    <g stroke="rgba(255,217,138,.75)" stroke-width="1.6">
+      <path d="M98 89 l8 26 M142 89 l-8 26 M106 92 l14 22 M134 92 l-14 22 M120 93 v22"/>
+      <path d="M101 100 h38 M105 110 h30"/>
+    </g>
+    <g transform="rotate(-4 120 140)">
+      <rect x="70" y="126" width="100" height="30" rx="6" fill="#0d1119" stroke="url(#auG)" stroke-width="2.6"/>
+      <line x1="120" y1="126" x2="120" y2="156" stroke="url(#auG)" stroke-width="1.6" stroke-dasharray="3 4"/>
+      <text x="95" y="145" text-anchor="middle" font-family="Georgia,serif" font-size="11" letter-spacing="1.5" fill="#ffd98a">ROW 1</text>
+      <g stroke="rgba(255,217,138,.85)" stroke-width="2">
+        <line x1="130" y1="132" x2="130" y2="150"/><line x1="137" y1="132" x2="137" y2="150"/><line x1="145" y1="132" x2="145" y2="150"/><line x1="154" y1="132" x2="154" y2="150"/>
+      </g>
+    </g>`);
+
+  /* ---- signed jersey ---- */
+  const jersey = wrap(`
+    <path d="M92 34 q28 14 56 0 l34 20 -14 26 -14 -8 v70 q-34 12 -68 0 v-70 l-14 8 -14 -26 z"
+      fill="rgba(242,178,75,.08)" stroke="url(#auG)" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M92 34 q28 24 56 0" stroke="url(#auG)" stroke-width="2.6" fill="none"/>
+    <g stroke="rgba(242,178,75,.45)" stroke-width="1.6">
+      <line x1="82" y1="140" x2="158" y2="140"/>
+    </g>
+    <text x="120" y="106" text-anchor="middle" font-family="Georgia,serif" font-size="38" font-weight="700" fill="url(#auV)" stroke="rgba(10,13,19,.4)" stroke-width=".8">10</text>
+    <path d="M88 126 q10 -10 18 -2 q6 6 14 -3 q9 -9 16 0 q6 8 16 -4" stroke="#ffd98a" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M196 48 l2.6 5.6 6 .7 -4.4 4.2 1.2 6 -5.4 -3.2 -5.4 3.2 1.2 -6 -4.4 -4.2 6 -.7 z" fill="url(#auG)"/>`);
+
+  return { watch, phone, cash, car, trip, suite, courtside, jersey };
+})();
+
+/* ============================================================
+   Ball cursors — a true-to-scale ghost of the actual ball,
+   drawn so the photo stays readable underneath.
+   Football is a prolate spheroid: its orientation is yours to set.
+   ============================================================ */
+const BALL_CURSOR = {
+  soccer: `<svg viewBox="0 0 100 100" class="bc-svg">
+    <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
+    <path d="M50 24 l19.7 14.3-7.5 23.1H37.8l-7.5-23.1z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
+    <g stroke="var(--bc)" stroke-width="1.6" opacity=".75">
+      <path d="M50 24V6M69.7 38.3 86.8 26M62.2 61.4 76.6 84M37.8 61.4 23.4 84M30.3 38.3 13.2 26"/>
+    </g>
+  </svg>`,
+  basketball: `<svg viewBox="0 0 100 100" class="bc-svg">
+    <circle cx="50" cy="50" r="46" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" stroke-width="1.8" fill="none" opacity=".8">
+      <path d="M4 50h92M50 4v92"/>
+      <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
+    </g>
+  </svg>`,
+  football: `<svg viewBox="0 0 100 62" class="bc-svg">
+    <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" stroke-width="1.8" opacity=".85">
+      <path d="M34 31h32" stroke-width="2.4"/>
+      <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
+      <path d="M11 31c4-4 4-4 0 0M89 31h-6M17 31h-6"/>
+    </g>
+    <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6" fill="none" opacity=".55"/>
+  </svg>`,
+};
+/* centre marker shared by every cursor */
+const BALL_CENTRE = `<span class="bc-dot"><i></i><i></i></span>`;
+/* ============================================================
+   SPOTTED.club — mock API layer
+   Every call returns a Promise and touches localStorage only.
+   Swap this file for real fetch() calls when the server exists —
+   app.js never reads data.js or storage directly.
+   ============================================================ */
+
+const API = (() => {
+  const KEY = 'spotted_demo_v1';
+  const START_BALANCE = 250;
+
+  /* ---------- storage ---------- */
+  function load() {
+    try {
+      if (location.search.includes('reset')) localStorage.removeItem(KEY);
+      const s = JSON.parse(localStorage.getItem(KEY));
+      // only trust a save whose shape still matches — otherwise start clean
+      if (s && s.v === 1 && typeof s.balance === 'number' && !isNaN(s.balance)
+          && s.entries && typeof s.entries === 'object'
+          && Array.isArray(s.tx) && typeof s.epoch === 'number') {
+        return s;
+      }
+    } catch (e) { /* fresh start */ }
+    return {
+      v: 1,
+      balance: START_BALANCE,
+      tx: [{ t: Date.now(), label: 'Welcome credit', amt: START_BALANCE }],
+      entries: {},   // compId -> [{x,y,t}]
+      credits: {},   // compId -> purchased tickets not yet placed
+      closed: {},    // compId -> true (demo "finish" pressed)
+      epoch: Date.now(),
+    };
+  }
+  function save(s) {
+    try { localStorage.setItem(KEY, JSON.stringify(s)); }
+    catch (e) { /* private mode / quota — demo still runs in memory */ }
+  }
+  let state = load();
+  // migrate saves written by earlier builds
+  state.credits = state.credits || {};
+  state.closed = state.closed || {};
+  state.entries = state.entries || {};
+
+  /* ---------- seeded rng (stable bot entries per competition) ---------- */
+  function rng(seedStr) {
+    let h = 2166136261;
+    for (let i = 0; i < seedStr.length; i++) { h ^= seedStr.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return () => {
+      h += 0x6D2B79F5;
+      let t = Math.imul(h ^ (h >>> 15), 1 | h);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------- scoring ----------
+     d = normalized distance in % of image diagonal (0..~141)
+     score: 1000 at dead centre, ~exp decay, 0 beyond far miss   */
+  function distPct(a, b) {
+    const dx = a.x - b.x, dy = a.y - b.y;
+    return Math.sqrt(dx * dx + dy * dy); // % space
+  }
+  function scoreFor(d) {
+    return Math.max(0, Math.round(1000 * Math.exp(-d / 9)));
+  }
+
+  function botEntries(comp) {
+    const r = rng(comp.id);
+    const n = 18 + Math.floor(r() * 6);
+    const bots = [];
+    for (let i = 0; i < n; i++) {
+      const name = BOT_NAMES[Math.floor(r() * BOT_NAMES.length)] + (r() > 0.7 ? '' : '_' + Math.floor(r() * 99));
+      // mixture: a third are sharp (σ≈2.2%), rest are scattered (σ≈9%)
+      const sharp = r() < 0.34;
+      const sd = sharp ? 2.2 : 9;
+      const gauss = () => (r() + r() + r() + r() - 2) * sd;
+      const x = Math.min(98, Math.max(2, comp.target.x + gauss()));
+      const y = Math.min(98, Math.max(2, comp.target.y + gauss()));
+      const d = distPct({ x, y }, comp.target);
+      bots.push({ name, x, y, d, score: scoreFor(d) });
+    }
+    return bots.sort((a, b) => a.d - b.d);
+  }
+
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const compById = id => COMPETITIONS.find(c => c.id === id);
+
+  function compView(c) {
+    const v = clone(c);
+    delete v.target;                       // clients never see the answer
+    delete v.ballImg; delete v.ballW;      // real-ball reveal assets stay server-side until results
+    v.closed = !!state.closed[c.id];
+    v.closesAt = state.epoch + c.closesIn * 1000;
+    v.myTickets = (state.entries[c.id] || []).length;
+    v.myCredits = state.credits[c.id] || 0;
+    v.sold = c.sold + v.myTickets;
+    return v;
+  }
+
+  /* ---------- public API ---------- */
+  return {
+    async me() {
+      return { name: 'Gil M.', initials: 'GM', balance: state.balance, tx: clone(state.tx).reverse().slice(0, 12) };
+    },
+
+    async topUp(amount) {
+      state.balance = +(state.balance + amount).toFixed(2);
+      state.tx.push({ t: Date.now(), label: 'Top-up (demo)', amt: amount });
+      save(state);
+      return { balance: state.balance };
+    },
+
+    async listCompetitions() {
+      return COMPETITIONS.map(compView);
+    },
+
+    async getCompetition(id) {
+      const c = compById(id);
+      return c ? compView(c) : null;
+    },
+
+    priceFor,   // pure pricing helper (sync)
+
+    async myEntries(compId) {
+      return clone(state.entries[compId] || []);
+    },
+
+    /* BOTB flow step 1 — buy tickets BEFORE the photo is revealed */
+    async buyTickets(compId, n) {
+      const c = compById(compId);
+      if (!c) throw new Error('Unknown competition');
+      if (state.closed[compId]) throw new Error('Competition is closed');
+      n = Math.max(1, Math.min(25, Math.floor(n)));
+      const cost = priceFor(n);
+      if (cost > state.balance) throw new Error('Insufficient balance');
+      state.balance = +(state.balance - cost).toFixed(2);
+      state.credits[compId] = (state.credits[compId] || 0) + n;
+      state.tx.push({ t: Date.now(), label: `${n} ticket${n > 1 ? 's' : ''} · ${c.title}`, amt: -cost });
+      save(state);
+      return { balance: state.balance, credits: state.credits[compId], cost };
+    },
+
+    /* step 2 — place the crosshairs the player already paid for */
+    async submitEntry(compId, picks) {
+      const c = compById(compId);
+      if (!c) throw new Error('Unknown competition');
+      if (state.closed[compId]) throw new Error('Competition is closed');
+      const credits = state.credits[compId] || 0;
+      if (picks.length > credits) throw new Error('Not enough tickets — buy more first');
+      state.credits[compId] = credits - picks.length;
+      const list = state.entries[compId] || (state.entries[compId] = []);
+      picks.forEach(p => list.push({ x: p.x, y: p.y, t: Date.now() }));
+      save(state);
+      return { balance: state.balance, total: list.length, credits: state.credits[compId] };
+    },
+
+    /* demo control — "finish the guessing" to preview the after-state */
+    async closeCompetition(compId) {
+      state.closed[compId] = true;
+      save(state);
+      return { ok: true };
+    },
+    async reopenCompetition(compId) {
+      delete state.closed[compId];
+      save(state);
+      return { ok: true };
+    },
+
+    /* full results — only meaningful once closed */
+    async getResults(compId) {
+      const c = compById(compId);
+      if (!c) return null;
+      const mine = (state.entries[compId] || []).map((p, i) => {
+        const d = distPct(p, c.target);
+        return { ...p, n: i + 1, d, score: scoreFor(d) };
+      }).sort((a, b) => a.d - b.d);
+      const bots = botEntries(c);
+      const rows = [
+        ...bots.map(b => ({ name: b.name, d: b.d, score: b.score, me: false })),
+        ...(mine.length ? [{ name: 'Gil M. (you)', d: mine[0].d, score: mine[0].score, me: true }] : []),
+      ].sort((a, b) => a.d - b.d).map((r, i) => ({ ...r, rank: i + 1 }));
+      return {
+        comp: compView(c),
+        target: clone(c.target),
+        ballImg: c.ballImg || null,
+        ballW: c.ballW || 0,
+        ballInPhoto: !!c.ballInPhoto,
+        mine, rows,
+        myRank: rows.find(r => r.me)?.rank ?? null,
+        myBest: mine[0] || null,
+      };
+    },
+
+    /* weekly tournament — my points = best score per closed comp I entered */
+    async tournament() {
+      const r = rng('tournament-w33');
+      let myPts = 0, myComps = 0;
+      for (const c of COMPETITIONS) {
+        if (!state.closed[c.id]) continue;
+        const picks = state.entries[c.id] || [];
+        if (!picks.length) continue;
+        const best = Math.max(...picks.map(p => scoreFor(distPct(p, c.target))));
+        myPts += best; myComps++;
+      }
+      const names = [...BOT_NAMES].sort(() => r() - 0.5).slice(0, 20);
+      const rows = names.map((name, i) => ({
+        name,
+        comps: 3 + Math.floor(r() * 9),
+        pts: Math.round(2500 - i * (90 + r() * 60) + r() * 80),
+        me: false,
+      }));
+      if (myComps > 0) rows.push({ name: 'Gil M. (you)', comps: myComps, pts: myPts, me: true });
+      rows.sort((a, b) => b.pts - a.pts).forEach((row, i) => row.rank = i + 1);
+      return {
+        ...clone(TOURNAMENT),
+        endsAt: state.epoch + TOURNAMENT.endsIn * 1000,
+        rows,
+        myRow: rows.find(row => row.me) || null,
+      };
+    },
+
+    async pastWinners() { return clone(PAST_WINNERS); },
+
+    async resetDemo() {
+      localStorage.removeItem(KEY);
+      state = load();
+      return { ok: true };
+    },
+  };
+})();
 /* ============================================================
    SPOTTED.club — app shell (hash router + views)
    Talks to API only; rendering is string-template based.
