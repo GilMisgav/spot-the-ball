@@ -54,7 +54,7 @@ body::before {
 ::selection { background: var(--gold); color: var(--ink); }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; cursor: pointer; }
-main { position: relative; z-index: 2; min-height: 68vh; }
+main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 
 /* ---------------- top bar ---------------- */
 .topbar {
@@ -124,9 +124,43 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 .btn.danger { background: transparent; border: 1px solid rgba(255,93,108,.4); color: var(--danger); box-shadow: none; }
 .btn.danger:hover { background: rgba(255,93,108,.1); }
 
+/* ---------------- ambient sport backdrops ---------------- */
+/* photography as atmosphere: desaturated, masked to nothing at the edges */
+.hero::after {
+  content: ''; position: absolute; inset: -6% -4% 0 auto;
+  width: min(64%, 900px); z-index: -1; pointer-events: none;
+  background: url('../assets/bg/hero.jpg') center/cover no-repeat;
+  opacity: .30; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(70% 65% at 72% 42%, #000 0%, rgba(0,0,0,.55) 45%, transparent 78%);
+          mask-image: radial-gradient(70% 65% at 72% 42%, #000 0%, rgba(0,0,0,.55) 45%, transparent 78%);
+}
+@media (max-width: 900px) { .hero::after { opacity: .16; width: 100%; inset: 0; } }
+
+.sport-block { position: relative; }
+.sport-block::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  top: -30px; right: -3%; width: min(52%, 720px); height: 340px;
+  background-image: var(--bg-sport); background-size: cover; background-position: center;
+  opacity: .17; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(62% 70% at 70% 40%, #000, transparent 72%);
+          mask-image: radial-gradient(62% 70% at 70% 40%, #000, transparent 72%);
+}
+.tourn-hero, .how-page { position: relative; }
+.tourn-hero::before, .how-page::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none;
+  inset: -20px -4% auto auto; width: min(58%, 780px); height: 420px;
+  background-size: cover; background-position: center;
+  opacity: .22; mix-blend-mode: screen;
+  -webkit-mask-image: radial-gradient(65% 68% at 68% 40%, #000, transparent 76%);
+          mask-image: radial-gradient(65% 68% at 68% 40%, #000, transparent 76%);
+}
+.tourn-hero::before { background-image: url('../assets/bg/tournament.jpg'); }
+.how-page::before { background-image: url('../assets/bg/how.jpg'); }
+@media (max-width: 760px) { .sport-block::before, .tourn-hero::before, .how-page::before { display: none; } }
+
 /* ---------------- hero ---------------- */
 .hero {
-  position: relative;
+  position: relative; isolation: isolate;
   padding: clamp(44px, 7vw, 92px) clamp(16px, 4vw, 44px) 34px;
   max-width: 1280px; margin: 0 auto;
 }
@@ -241,7 +275,7 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 }
 
 /* ---------------- sport dividers ---------------- */
-.sport-block { margin-bottom: 44px; }
+.sport-block { margin-bottom: 44px; isolation: isolate; }
 .sport-block:last-child { margin-bottom: 0; }
 .sport-divider {
   display: flex; align-items: center; gap: 18px;
@@ -436,25 +470,51 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 }
 .board.aiming .coords { opacity: 1; }
 
-/* loupe magnifier */
-.loupe {
-  position: absolute; z-index: 9; width: 150px; height: 150px; border-radius: 50%;
-  border: 2px solid var(--gold); pointer-events: none; opacity: 0; transition: opacity .15s;
-  background-repeat: no-repeat; overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,.6), inset 0 0 0 1px rgba(0,0,0,.5);
+/* ball cursor — the ball at true scale, ghosted so the photo reads through */
+.ball-cursor {
+  position: absolute; z-index: 7; pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  opacity: 0; transition: opacity .15s;
+  --bc: #ffd98a;
+  filter: drop-shadow(0 0 6px rgba(0,0,0,.85)) drop-shadow(0 0 14px rgba(242,178,75,.35));
 }
-.board.aiming .loupe { opacity: 1; }
-.loupe::before, .loupe::after {
-  content: ''; position: absolute; background: rgba(242,178,75,.8);
+.board.aiming .ball-cursor { opacity: 1; }
+.bc-svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.bc-dot {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0;
+  transform: rotate(calc(-1 * var(--rot, 0deg)));
 }
-.loupe::before { left: 50%; top: 0; bottom: 0; width: 1px; }
-.loupe::after { top: 50%; left: 0; right: 0; height: 1px; }
+.bc-dot i {
+  position: absolute; background: #fff; box-shadow: 0 0 4px rgba(0,0,0,.9);
+}
+.bc-dot i:first-child { left: -7px; width: 14px; top: -.5px; height: 1px; }
+.bc-dot i:last-child { top: -7px; height: 14px; left: -.5px; width: 1px; }
 
 /* pins */
 .pin {
   position: absolute; z-index: 10; width: 26px; height: 26px; margin: -13px 0 0 -13px;
   pointer-events: auto; cursor: pointer;
 }
+/* ball-shaped pin: same footprint as the real ball */
+.ball-pin {
+  width: var(--pin-w, 26px); height: var(--pin-h, 26px); margin: 0;
+  transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+  --bc: #f2b24b;
+  animation: pinPop .35s cubic-bezier(.2,1.4,.4,1) both;
+  filter: drop-shadow(0 0 5px rgba(0,0,0,.8));
+}
+.pin.ball-pin .bc-svg { width: 100%; height: 100%; }
+.pin.ball-pin .n {
+  top: auto; bottom: -20px; left: 50%; height: auto;
+  transform: translateX(-50%) rotate(calc(-1 * var(--rot, 0deg)));
+  white-space: nowrap; width: auto; padding: 1px 7px; animation: none;
+}
+.pin.ball-pin .d { display: none; }
+.ball-pin.submitted { --bc: #3ddc84; animation: none; }
+.ball-pin.best { --bc: #ffd98a; }
+.ball-pin:hover { --bc: #ff5d6c; }
+.ball-pin.submitted:hover, .ball-pin.best:hover { --bc: #3ddc84; }
+.ball-pin.best:hover { --bc: #ffd98a; }
 .pin .c {
   position: absolute; inset: 0; border-radius: 50%;
   border: 2px solid var(--gold); background: rgba(242,178,75,.15);
@@ -559,6 +619,28 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 }
 .stepper button:hover { border-color: var(--gold); color: var(--gold-hi); }
 .stepper b { min-width: 36px; text-align: center; font-family: var(--mono); font-size: 16px; }
+
+/* football spin control */
+.spin-row { display: flex; align-items: center; gap: 14px; }
+.spin-preview {
+  width: 62px; flex: none; --bc: var(--gold-hi);
+  transform: rotate(var(--rot, 0deg)); transition: transform .12s linear;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.5));
+}
+.spin-preview svg { width: 100%; height: auto; display: block; }
+#angSlider {
+  flex: 1; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 4px;
+  background: linear-gradient(90deg, var(--gold-deep), var(--gold)); outline: none;
+}
+#angSlider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--gold-hi); border: 2px solid var(--ink); cursor: grab;
+  box-shadow: 0 0 10px rgba(242,178,75,.7);
+}
+#angSlider::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%; background: var(--gold-hi);
+  border: 2px solid var(--ink); cursor: grab;
+}
 
 /* board footer hint */
 .board-hint {
@@ -671,6 +753,7 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 
 /* ---------------- tournament page ---------------- */
 .tourn-hero {
+  isolation: isolate;
   max-width: 1280px; margin: 0 auto; padding: 56px clamp(16px,4vw,44px) 10px;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 26px; flex-wrap: wrap;
 }
@@ -688,7 +771,7 @@ main { position: relative; z-index: 2; min-height: 68vh; }
 .tourn-empty { padding: 18px 4px; color: var(--text-faint); font-size: 13px; }
 
 /* ---------------- how page ---------------- */
-.how-page { max-width: 900px; margin: 0 auto; padding: 60px clamp(16px,4vw,44px) 80px; }
+.how-page { isolation: isolate; max-width: 900px; margin: 0 auto; padding: 60px clamp(16px,4vw,44px) 80px; }
 .how-page h1 { font-family: var(--disp); font-weight: 800; text-transform: uppercase; font-size: clamp(38px,6vw,72px); margin-bottom: 8px; }
 .how-page .lead { color: var(--text-dim); font-size: 17px; max-width: 60ch; margin-bottom: 36px; }
 .how-page h1 span { color: var(--gold); }

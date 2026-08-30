@@ -152,3 +152,36 @@ const PRIZE_ART = (() => {
 
   return { watch, phone, cash, car, trip, suite, courtside, jersey };
 })();
+
+/* ============================================================
+   Ball cursors — a true-to-scale ghost of the actual ball,
+   drawn so the photo stays readable underneath.
+   Football is a prolate spheroid: its orientation is yours to set.
+   ============================================================ */
+const BALL_CURSOR = {
+  soccer: `<svg viewBox="0 0 100 100" class="bc-svg">
+    <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
+    <path d="M50 24 l19.7 14.3-7.5 23.1H37.8l-7.5-23.1z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
+    <g stroke="var(--bc)" stroke-width="1.6" opacity=".75">
+      <path d="M50 24V6M69.7 38.3 86.8 26M62.2 61.4 76.6 84M37.8 61.4 23.4 84M30.3 38.3 13.2 26"/>
+    </g>
+  </svg>`,
+  basketball: `<svg viewBox="0 0 100 100" class="bc-svg">
+    <circle cx="50" cy="50" r="46" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" stroke-width="1.8" fill="none" opacity=".8">
+      <path d="M4 50h92M50 4v92"/>
+      <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
+    </g>
+  </svg>`,
+  football: `<svg viewBox="0 0 100 62" class="bc-svg">
+    <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" stroke-width="1.8" opacity=".85">
+      <path d="M34 31h32" stroke-width="2.4"/>
+      <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
+      <path d="M11 31c4-4 4-4 0 0M89 31h-6M17 31h-6"/>
+    </g>
+    <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6" fill="none" opacity=".55"/>
+  </svg>`,
+};
+/* centre marker shared by every cursor */
+const BALL_CENTRE = `<span class="bc-dot"><i></i><i></i></span>`;

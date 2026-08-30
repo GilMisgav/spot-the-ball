@@ -194,7 +194,7 @@ async function viewHome(sportFilter) {
       const group = comps.filter(c => c.sport === k);
       const pool = group.length;
       return `
-      <div class="sport-block" style="--acc:${s.accent}">
+      <div class="sport-block" style="--acc:${s.accent};--bg-sport:url('assets/bg/${k}.jpg')">
         <div class="sport-divider">
           <span class="sd-medal">${s.icon}</span>
           <h3 class="sd-word">${s.label}</h3>
@@ -210,7 +210,7 @@ async function viewHome(sportFilter) {
     <div class="sec-head"><h2>How it works</h2></div>
     <div class="how-grid">
       <div class="how-card"><div class="num">01</div><h3>Pick a moment</h3><p>Choose a competition. Every photo is a real frame of play with the ball digitally removed.</p></div>
-      <div class="how-card"><div class="num">02</div><h3>Buy your tickets</h3><p>Choose your bundle before the photo is revealed — 1 to 25 crosshairs, bigger bundles cost less per pin. Then the moment unlocks.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Buy your tickets</h3><p>Choose your bundle before the photo is revealed — 1 to 25 crosshairs, bigger bundles cost less per pin. Then the moment unlocks and you aim with a true-size ball.</p></div>
       <div class="how-card"><div class="num">03</div><h3>Judges decide</h3><p>When entries close, our panel of pros fixes the ball's true position. It's their judgement — not the original photo — that counts. Skill, not chance.</p></div>
       <div class="how-card"><div class="num">04</div><h3>Closest wins</h3><p>Nearest crosshair takes the headline prize. Every entry earns precision points toward the weekly tournament pot.</p></div>
     </div>
@@ -379,12 +379,11 @@ async function renderBoard(c, submitted) {
           <div class="board" id="board">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
             <div class="hairV"></div><div class="hairH"></div>
-            <div class="reticle"></div>
+            <div class="ball-cursor" id="ballCursor">${BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
             <div class="coords"></div>
-            <div class="loupe"></div>
           </div>
           <div class="board-hint">
-            <span><span class="k">AIM</span> — move to inspect with the loupe · <span class="k">CLICK</span> — place a paid crosshair · click a pin to take it back</span>
+            <span><span class="k">AIM</span> — the ghost is the ball at its true size · <span class="k">CLICK</span> — place a paid crosshair${c.sport === 'football' ? ' · <span class="k">SCROLL / [ ]</span> — spin the ball' : ''} · click a pin to take it back</span>
             <span>${esc(c.sub)}</span>
           </div>
         </div>
@@ -402,6 +401,16 @@ async function renderBoard(c, submitted) {
           <button class="btn big" id="submitBtn" disabled>Lock in entry</button>
           <div class="tier-hint">Already paid — locking costs nothing. Unplaced tickets stay in hand.</div>
         </div>
+
+        ${c.sport === 'football' ? `
+        <div class="panel-card">
+          <h4>Ball angle <span class="mono" id="angLabel">0°</span></h4>
+          <div class="spin-row">
+            <div class="spin-preview" id="spinPreview">${BALL_CURSOR.football}</div>
+            <input type="range" id="angSlider" min="0" max="359" value="0" step="1">
+          </div>
+          <div class="tier-hint">A football is not a sphere — set the angle you believe it was spinning at. Scroll over the photo, drag the slider, or press [ and ].</div>
+        </div>` : ''}
 
         <div class="panel-card">
           <h4>Add tickets</h4>
@@ -439,15 +448,16 @@ async function renderBoard(c, submitted) {
     $('#submitBtn').textContent = n ? `Lock in ${n} crosshair${n > 1 ? 's' : ''}` : 'Lock in entry';
     $('#picksList').innerHTML = [
       ...submitted.map((p, i) => `<div class="pick-row submitted"><span class="idx">${i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><span class="lock">✓ locked</span></div>`),
-      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><button class="del" data-del="${i}">×</button></div>`),
+      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°` : ''}</span><button class="del" data-del="${i}">×</button></div>`),
     ].join('');
     $$('[data-del]').forEach(b => b.addEventListener('click', () => { picks.splice(+b.dataset.del, 1); renderPins(); }));
   }
   function pinEl(p, n, locked) {
     const el = document.createElement('div');
-    el.className = 'pin' + (locked ? ' submitted' : '');
+    el.className = 'pin ball-pin' + (locked ? ' submitted' : '');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
-    el.innerHTML = `<span class="c"></span><span class="d"></span><span class="n">${n}</span>`;
+    el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span><span class="n">${n}</span>`;
     if (!locked) el.addEventListener('click', e => {
       e.stopPropagation();
       picks = picks.filter(q => q !== p); renderPins();
@@ -455,23 +465,56 @@ async function renderBoard(c, submitted) {
     return el;
   }
 
-  const LZ = 2.6, LS = 150;
+  let angle = 0;   // football spin, degrees
+
+  function sizeCursor() {
+    const r = board.getBoundingClientRect();
+    const w = c.ballSize / 100 * r.width;
+    const cur = $('#ballCursor');
+    if (!cur) return;
+    cur.style.width = w + 'px';
+    cur.style.height = (c.sport === 'football' ? w * 0.62 : w) + 'px';
+    board.style.setProperty('--pin-w', w + 'px');
+    board.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+  }
+  addEventListener('resize', sizeCursor);
+  if (img.complete) sizeCursor(); else img.addEventListener('load', sizeCursor);
+
+  function setAngle(deg) {
+    angle = ((deg % 360) + 360) % 360;
+    const cur = $('#ballCursor');
+    if (cur) cur.style.setProperty('--rot', angle + 'deg');
+    const lbl = $('#angLabel'); if (lbl) lbl.textContent = Math.round(angle) + '°';
+    const sl = $('#angSlider'); if (sl && +sl.value !== Math.round(angle)) sl.value = Math.round(angle);
+    const pv = $('#spinPreview'); if (pv) pv.style.setProperty('--rot', angle + 'deg');
+  }
+
   function aim(e) {
     const r = board.getBoundingClientRect();
     const cx = e.clientX - r.left, cy = e.clientY - r.top;
     if (cx < 0 || cy < 0 || cx > r.width || cy > r.height) return;
     board.classList.add('aiming');
     hairV.style.left = cx + 'px'; hairH.style.top = cy + 'px';
-    reticle.style.left = cx + 'px'; reticle.style.top = cy + 'px';
+    const cur = $('#ballCursor');
+    cur.style.left = cx + 'px'; cur.style.top = cy + 'px';
     coords.style.left = cx + 'px'; coords.style.top = cy + 'px';
-    coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`;
-    const lx = cx + (cx > r.width - 190 ? -LS - 26 : 26);
-    const ly = cy + (cy > r.height - 190 ? -LS - 26 : 26);
-    loupe.style.left = lx + 'px'; loupe.style.top = ly + 'px';
-    loupe.style.backgroundImage = `url('${c.img}')`;
-    loupe.style.backgroundSize = `${r.width * LZ}px ${r.height * LZ}px`;
-    loupe.style.backgroundPosition = `${-(cx * LZ - LS / 2)}px ${-(cy * LZ - LS / 2)}px`;
+    coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`
+      + (c.sport === 'football' ? ` · ${Math.round(angle)}°` : '');
   }
+
+  if (c.sport === 'football') {
+    board.addEventListener('wheel', e => {
+      e.preventDefault();
+      setAngle(angle + (e.deltaY > 0 ? 6 : -6));
+    }, { passive: false });
+    addEventListener('keydown', e => {
+      if (e.key === '[') setAngle(angle - 6);
+      if (e.key === ']') setAngle(angle + 6);
+    });
+    $('#angSlider')?.addEventListener('input', e => setAngle(+e.target.value));
+    setAngle(0);
+  }
+
   board.addEventListener('mousemove', aim);
   board.addEventListener('mouseleave', () => board.classList.remove('aiming'));
   board.addEventListener('click', e => {
@@ -479,7 +522,7 @@ async function renderBoard(c, submitted) {
     const r = board.getBoundingClientRect();
     const x = (e.clientX - r.left) / r.width * 100;
     const y = (e.clientY - r.top) / r.height * 100;
-    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2) });
+    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle });
     renderPins();
   });
 
@@ -627,11 +670,21 @@ async function viewResults(id) {
 
   /* draw my pins + distance line for best */
   const rb = $('#resBoard');
+  const sizePins = () => {
+    const w = c.ballSize / 100 * rb.clientWidth;
+    rb.style.setProperty('--pin-w', w + 'px');
+    rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+  };
+  const rimg = $('img', rb);
+  if (rimg.complete) sizePins(); else rimg.addEventListener('load', sizePins);
+  addEventListener('resize', sizePins);
+
   mine.forEach((p, i) => {
     const el = document.createElement('div');
-    el.className = 'pin' + (i === 0 ? ' best' : ' submitted');
+    el.className = 'pin ball-pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
-    el.innerHTML = `<span class="c"></span><span class="d"></span>
+    el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span>
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
   });
@@ -731,7 +784,7 @@ async function viewHow() {
     <p class="lead">Spot the Ball is a game of judgement — legally and philosophically the opposite of a lottery. Here's the full loop, exactly as the production build will run it.</p>
     <div class="how-grid" style="grid-template-columns:1fr">
       <div class="how-card"><div class="num">01</div><h3>The moment</h3><p>We license a professional sports photograph and digitally remove the ball. Nothing else in the frame is touched.</p></div>
-      <div class="how-card"><div class="num">02</div><h3>Buy, then aim</h3><p>Tickets are bought blind — the photo stays hidden until you hold crosshairs to place. Then study eye-lines, body shape and physics, and use the loupe for millimetre placement.</p></div>
+      <div class="how-card"><div class="num">02</div><h3>Buy, then aim</h3><p>Tickets are bought blind — the photo stays hidden until you hold crosshairs to place. Your cursor is a ghost of the actual ball at its true size in that frame, so you judge the whole shape, not a dot. A football is no sphere: spin it 360° to the angle you believe it flew at.</p></div>
       <div class="how-card"><div class="num">03</div><h3>The panel</h3><p>After entries close, a panel of former pros studies the frame and fixes the definitive ball position. The judges' ball — not the original photo — is the target. That's what keeps it 100% skill.</p></div>
       <div class="how-card"><div class="num">04</div><h3>Scoring</h3><p>Each pin earns <b>1000 · e<sup>−d/9</sup></b> points, where d is the distance to the judges' ball in board units. Closest single pin takes the headline prize; your best pin per contest feeds the weekly tournament pot.</p></div>
       <div class="how-card"><div class="num">05</div><h3>The wallet</h3><p>Top up, enter, withdraw winnings. In this demo the balance is simulated — the production app plugs a real PSP into the exact same API surface.</p></div>
