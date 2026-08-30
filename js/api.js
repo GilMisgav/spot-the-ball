@@ -56,9 +56,12 @@ const API = (() => {
   /* ---------- scoring ----------
      d = normalized distance in % of image diagonal (0..~141)
      score: 1000 at dead centre, ~exp decay, 0 beyond far miss   */
-  function distPct(a, b) {
-    const dx = a.x - b.x, dy = a.y - b.y;
-    return Math.sqrt(dx * dx + dy * dy); // % space
+  /* true geometric distance, in units of image width.
+     A raw y-percentage covers fewer pixels than an x-percentage on a landscape
+     photo, so y is scaled by the image aspect ratio before measuring. */
+  function distPct(a, b, ar = 1) {
+    const dx = a.x - b.x, dy = (a.y - b.y) * ar;
+    return Math.sqrt(dx * dx + dy * dy);
   }
   function scoreFor(d) {
     return Math.max(0, Math.round(1000 * Math.exp(-d / 9)));
@@ -76,7 +79,7 @@ const API = (() => {
       const gauss = () => (r() + r() + r() + r() - 2) * sd;
       const x = Math.min(98, Math.max(2, comp.target.x + gauss()));
       const y = Math.min(98, Math.max(2, comp.target.y + gauss()));
-      const d = distPct({ x, y }, comp.target);
+      const d = distPct({ x, y }, comp.target, comp.ar || 1);
       bots.push({ name, x, y, d, score: scoreFor(d) });
     }
     return bots.sort((a, b) => a.d - b.d);
@@ -149,7 +152,7 @@ const API = (() => {
       if (picks.length > credits) throw new Error('Not enough tickets — buy more first');
       state.credits[compId] = credits - picks.length;
       const list = state.entries[compId] || (state.entries[compId] = []);
-      picks.forEach(p => list.push({ x: p.x, y: p.y, t: Date.now() }));
+      picks.forEach(p => list.push({ x: p.x, y: p.y, a: p.a || 0, tilt: p.tilt || 0, t: Date.now() }));
       save(state);
       return { balance: state.balance, total: list.length, credits: state.credits[compId] };
     },
@@ -171,7 +174,7 @@ const API = (() => {
       const c = compById(compId);
       if (!c) return null;
       const mine = (state.entries[compId] || []).map((p, i) => {
-        const d = distPct(p, c.target);
+        const d = distPct(p, c.target, c.ar || 1);
         return { ...p, n: i + 1, d, score: scoreFor(d) };
       }).sort((a, b) => a.d - b.d);
       const bots = botEntries(c);
@@ -199,7 +202,7 @@ const API = (() => {
         if (!state.closed[c.id]) continue;
         const picks = state.entries[c.id] || [];
         if (!picks.length) continue;
-        const best = Math.max(...picks.map(p => scoreFor(distPct(p, c.target))));
+        const best = Math.max(...picks.map(p => scoreFor(distPct(p, c.target, c.ar || 1))));
         myPts += best; myComps++;
       }
       const names = [...BOT_NAMES].sort(() => r() - 0.5).slice(0, 20);

@@ -18,7 +18,10 @@ addEventListener('error', e => {
 }, true);
 
 let tickTimers = [];
-function clearTicks() { tickTimers.forEach(clearInterval); tickTimers = []; }
+function clearTicks() {
+  tickTimers.forEach(t => { if (t && t.off) t.off(); else clearInterval(t); });
+  tickTimers = [];
+}
 
 /* ---------- countdown ---------- */
 function fmtLeft(ms) {
@@ -217,9 +220,24 @@ async function viewHome(sportFilter) {
   </section>
 
   <section class="section">
-    <div class="sec-head"><h2>Recent winners</h2></div>
+    <div class="sec-head">
+      <h2>The winners' wall</h2>
+      <span class="count">illustrative · demo build</span>
+    </div>
     <div class="win-strip">
-      ${winners.map(w => `<div class="win-card"><div class="w">WEEK ${w.week.slice(1)}</div><div class="p">${esc(w.prize)}</div><div class="n">${esc(w.name)} · ${esc(w.from)}</div></div>`).join('')}
+      ${winners.map(w => `
+        <figure class="win-card">
+          <div class="wc-photo">
+            <img src="${w.photo}" alt="" loading="lazy">
+            <span class="wc-sport">${SPORTS[w.sport].icon}</span>
+            <span class="wc-week">WEEK ${w.week.slice(1)}</span>
+          </div>
+          <figcaption>
+            <div class="p">${esc(w.prize)}</div>
+            <div class="n">${esc(w.name)} · ${esc(w.from)}</div>
+            <div class="d">won by <b>${w.dist}</b> units</div>
+          </figcaption>
+        </figure>`).join('')}
     </div>
   </section>`;
 
@@ -404,12 +422,15 @@ async function renderBoard(c, submitted) {
 
         ${c.sport === 'football' ? `
         <div class="panel-card">
-          <h4>Ball angle <span class="mono" id="angLabel">0°</span></h4>
+          <h4>Ball orientation <span class="mono" id="angLabel">0° · 0°</span></h4>
           <div class="spin-row">
             <div class="spin-preview" id="spinPreview">${BALL_CURSOR.football}</div>
-            <input type="range" id="angSlider" min="0" max="359" value="0" step="1">
+            <div class="spin-axes">
+              <label>Spin<input type="range" id="angSlider" min="0" max="359" value="0" step="1"></label>
+              <label>Depth<input type="range" id="tiltSlider" min="0" max="90" value="0" step="1"></label>
+            </div>
           </div>
-          <div class="tier-hint">A football is not a sphere — set the angle you believe it was spinning at. Scroll over the photo, drag the slider, or press [ and ].</div>
+          <div class="tier-hint">A football is no sphere. <em>Spin</em> turns it in the frame; <em>depth</em> turns its nose toward you until it reads as a circle. Scroll to spin, <em>shift</em>+scroll for depth, or press [ ] and - =.</div>
         </div>` : ''}
 
         <div class="panel-card">
@@ -448,7 +469,7 @@ async function renderBoard(c, submitted) {
     $('#submitBtn').textContent = n ? `Lock in ${n} crosshair${n > 1 ? 's' : ''}` : 'Lock in entry';
     $('#picksList').innerHTML = [
       ...submitted.map((p, i) => `<div class="pick-row submitted"><span class="idx">${i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><span class="lock">✓ locked</span></div>`),
-      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°` : ''}</span><button class="del" data-del="${i}">×</button></div>`),
+      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°/${Math.round(p.tilt || 0)}°` : ''}</span><button class="del" data-del="${i}">×</button></div>`),
     ].join('');
     $$('[data-del]').forEach(b => b.addEventListener('click', () => { picks.splice(+b.dataset.del, 1); renderPins(); }));
   }
@@ -457,6 +478,7 @@ async function renderBoard(c, submitted) {
     el.className = 'pin ball-pin' + (locked ? ' submitted' : '');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    el.style.setProperty('--sx', sxFor(p.tilt || 0).toFixed(4));
     el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span><span class="n">${n}</span>`;
     if (!locked) el.addEventListener('click', e => {
       e.stopPropagation();
@@ -465,7 +487,8 @@ async function renderBoard(c, submitted) {
     return el;
   }
 
-  let angle = 0;   // football spin, degrees
+  let angle = 0;   // football spin in the plane, degrees
+  let tilt = 0;    // football depth rotation (0 = side on, 90 = nose on)
 
   function sizeCursor() {
     const r = board.getBoundingClientRect();
@@ -480,14 +503,23 @@ async function renderBoard(c, submitted) {
   addEventListener('resize', sizeCursor);
   if (img.complete) sizeCursor(); else img.addEventListener('load', sizeCursor);
 
-  function setAngle(deg) {
-    angle = ((deg % 360) + 360) % 360;
-    const cur = $('#ballCursor');
-    if (cur) cur.style.setProperty('--rot', angle + 'deg');
-    const lbl = $('#angLabel'); if (lbl) lbl.textContent = Math.round(angle) + '°';
+  /* long axis shrinks from a full oval to a circle as the nose turns toward us */
+  const sxFor = t => (28 + (47 - 28) * Math.cos(t * Math.PI / 180)) / 47;
+
+  function setOrient(deg, deep) {
+    if (deg !== null) angle = ((deg % 360) + 360) % 360;
+    if (deep !== null) tilt = Math.max(0, Math.min(90, deep));
+    const sx = sxFor(tilt);
+    [$('#ballCursor'), $('#spinPreview')].forEach(el => {
+      if (!el) return;
+      el.style.setProperty('--rot', angle + 'deg');
+      el.style.setProperty('--sx', sx.toFixed(4));
+    });
+    const lbl = $('#angLabel'); if (lbl) lbl.textContent = `${Math.round(angle)}° · ${Math.round(tilt)}°`;
     const sl = $('#angSlider'); if (sl && +sl.value !== Math.round(angle)) sl.value = Math.round(angle);
-    const pv = $('#spinPreview'); if (pv) pv.style.setProperty('--rot', angle + 'deg');
+    const tl = $('#tiltSlider'); if (tl && +tl.value !== Math.round(tilt)) tl.value = Math.round(tilt);
   }
+  const setAngle = d => setOrient(d, null);
 
   function aim(e) {
     const r = board.getBoundingClientRect();
@@ -499,20 +531,26 @@ async function renderBoard(c, submitted) {
     cur.style.left = cx + 'px'; cur.style.top = cy + 'px';
     coords.style.left = cx + 'px'; coords.style.top = cy + 'px';
     coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`
-      + (c.sport === 'football' ? ` · ${Math.round(angle)}°` : '');
+      + (c.sport === 'football' ? ` · ${Math.round(angle)}°/${Math.round(tilt)}°` : '');
   }
 
   if (c.sport === 'football') {
     board.addEventListener('wheel', e => {
       e.preventDefault();
-      setAngle(angle + (e.deltaY > 0 ? 6 : -6));
+      const step = e.deltaY > 0 ? 6 : -6;
+      if (e.shiftKey) setOrient(null, tilt + step); else setOrient(angle + step, null);
     }, { passive: false });
-    addEventListener('keydown', e => {
-      if (e.key === '[') setAngle(angle - 6);
-      if (e.key === ']') setAngle(angle + 6);
-    });
-    $('#angSlider')?.addEventListener('input', e => setAngle(+e.target.value));
-    setAngle(0);
+    const onKey = e => {
+      if (e.key === '[') setOrient(angle - 6, null);
+      if (e.key === ']') setOrient(angle + 6, null);
+      if (e.key === '-') setOrient(null, tilt - 6);
+      if (e.key === '=' || e.key === '+') setOrient(null, tilt + 6);
+    };
+    addEventListener('keydown', onKey);
+    tickTimers.push({ off: () => removeEventListener('keydown', onKey) });
+    $('#angSlider')?.addEventListener('input', e => setOrient(+e.target.value, null));
+    $('#tiltSlider')?.addEventListener('input', e => setOrient(null, +e.target.value));
+    setOrient(0, 0);
   }
 
   board.addEventListener('mousemove', aim);
@@ -543,7 +581,7 @@ async function renderBoard(c, submitted) {
     const x = (pt.clientX - r.left) / r.width * 100;
     const y = (pt.clientY - r.top) / r.height * 100;
     if (x < 0 || y < 0 || x > 100 || y > 100) return;
-    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle });
+    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle, tilt });
     renderPins();
   }
   board.addEventListener('click', e => place(e));
@@ -706,6 +744,8 @@ async function viewResults(id) {
     el.className = 'pin ball-pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    const sx = (28 + (47 - 28) * Math.cos((p.tilt || 0) * Math.PI / 180)) / 47;
+    el.style.setProperty('--sx', sx.toFixed(4));
     el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span>
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
@@ -856,7 +896,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 16;
+const BUILD = 18;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

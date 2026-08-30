@@ -32,35 +32,35 @@ const COMPETITIONS = [
     title: 'The Wall', sub: 'World Cup qualifier · set-piece chaos in the box',
     prize: '$50,000 Cash', prizeShort: '$50K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-roll.jpg', fee: 3.0,
     closesIn: 2 * 3600 + 14 * 60, sold: 8412, cap: 12000,
-    target: { x: 9.9, y: 50.4 }, ballSize: 4.3, ballImg: 'assets/balls/sc-freekick.png', ballW: 9.46,
+    target: { x: 9.9, y: 50.4 }, ar: 0.6667, ballSize: 4.3, ballImg: 'assets/balls/sc-freekick.png', ballW: 9.46,
   },
   {
     id: 'sc-eldiez', sport: 'soccer', img: 'assets/img/soccer-2.jpg', landscape: true,
     title: 'El Diez', sub: 'The №10 strikes — keeper at full flight',
     prize: 'VIP World Cup Final · Trip for 2', prizeShort: 'WC FINAL ×2', prizeType: 'trip', prizeImg: 'assets/prizes/worldcup-trophy.jpg', fee: 3.0,
     closesIn: 5 * 3600 + 42 * 60, sold: 10930, cap: 15000, featured: true,
-    target: { x: 14.0, y: 77.3 }, ballSize: 5.6, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
+    target: { x: 14.0, y: 77.3 }, ar: 0.6667, ballSize: 5.6, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
   },
   {
     id: 'sc-stretch', sport: 'soccer', img: 'assets/img/soccer-3.jpg', landscape: true,
     title: 'Full Stretch', sub: 'Beaten at the near post? You be the judge',
     prize: 'Rolex Day-Date Platinum', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex.jpg', fee: 2.5,
     closesIn: 9 * 3600 + 5 * 60, sold: 3204, cap: 8000,
-    target: { x: 22.6, y: 82.6 }, ballSize: 8.4, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
+    target: { x: 22.6, y: 82.6 }, ar: 0.6667, ballSize: 8.4, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
   },
   {
     id: 'sc-slide', sport: 'soccer', img: 'assets/img/soccer-4.jpg', landscape: true,
     title: 'The Slide', sub: 'Last-ditch block on the edge of the area',
     prize: 'AirPods Max', prizeShort: 'AIRPODS MAX', prizeType: 'phone', prizeImg: 'assets/prizes/airpods.jpg', fee: 3.0,
     closesIn: 26 * 3600, sold: 5127, cap: 10000,
-    target: { x: 18.4, y: 72.2 }, ballSize: 6.6, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
+    target: { x: 18.4, y: 72.2 }, ar: 0.6667, ballSize: 6.6, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
   },
   {
     id: 'sc-firsttouch', sport: 'soccer', img: 'assets/img/soccer-5.jpg', landscape: true,
     title: 'First Touch', sub: 'Cross whipped in — who gets there first?',
     prize: 'Tesla Model Y', prizeShort: 'TESLA', prizeType: 'car', prizeImg: 'assets/prizes/tesla.jpg', fee: 3.5,
     closesIn: 49 * 3600, sold: 1980, cap: 14000,
-    target: { x: 46.1, y: 20.0 }, ballSize: 5.4, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
+    target: { x: 46.1, y: 20.0 }, ar: 0.6667, ballSize: 5.4, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
   },
   // ---------------- FOOTBALL ----------------
   {
@@ -68,21 +68,21 @@ const COMPETITIONS = [
     title: 'Pocket Pressure', sub: 'Release under the rush — follow the spiral',
     prize: '$100,000 Cash', prizeShort: '$100K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-100s.jpg', fee: 3.5,
     closesIn: 3 * 3600 + 31 * 60, sold: 14208, cap: 20000, featured: true,
-    target: { x: 71.9, y: 9.5 }, ballSize: 10.0, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
+    target: { x: 71.9, y: 9.5 }, ar: 0.6667, ballSize: 10.0, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
   },
   {
     id: 'fb-fourthdown', sport: 'football', img: 'assets/img/football-2.jpg', landscape: true,
     title: 'Fourth Down', sub: 'The pass breakup that decided the bowl',
     prize: 'Super Bowl Suite for 4', prizeShort: 'SB SUITE ×4', prizeType: 'suite', prizeImg: 'assets/prizes/stadium-tunnel.jpg', fee: 3.0,
     closesIn: 12 * 3600 + 18 * 60, sold: 6741, cap: 16000,
-    target: { x: 44.4, y: 46.7 }, ballSize: 8.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
+    target: { x: 44.4, y: 46.7 }, ar: 0.6667, ballSize: 8.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
   },
   {
     id: 'fb-looseball', sport: 'football', img: 'assets/img/football-3.jpg', landscape: true,
     title: 'Loose Ball', sub: 'Fumble! Every eye on the turf',
     prize: 'Rolex Day-Date Everose', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex-everose.jpg', fee: 2.5,
     closesIn: 31 * 3600, sold: 2456, cap: 9000,
-    target: { x: 57.6, y: 86.7 }, ballSize: 7.0, ballInPhoto: true,
+    target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 7.0, ballInPhoto: true,
   },
   // ---------------- BASKETBALL ----------------
   {
@@ -90,28 +90,28 @@ const COMPETITIONS = [
     title: 'Top of the Key', sub: 'Bird\'s-eye over the rim — swish or rattle?',
     prize: 'Courtside Season Tickets', prizeShort: 'COURTSIDE', prizeType: 'courtside', prizeImg: 'assets/prizes/courtside.jpg', fee: 3.0,
     closesIn: 4 * 3600 + 3 * 60, sold: 7311, cap: 12000,
-    target: { x: 46.5, y: 87.8 }, ballSize: 9.1, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
+    target: { x: 46.5, y: 87.8 }, ar: 0.6667, ballSize: 9.1, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
   },
   {
     id: 'bb-rimrunner', sport: 'basketball', img: 'assets/img/basketball-2.jpg', landscape: true,
     title: 'Rim Runner', sub: 'Traffic in the paint, first half fire',
     prize: 'Framed Signed Kobe Jersey', prizeShort: 'KOBE 24', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-kobe.jpg', fee: 3.0,
     closesIn: 8 * 3600 + 47 * 60, sold: 4102, cap: 10000,
-    target: { x: 48.8, y: 10.0 }, ballSize: 8.6, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
+    target: { x: 48.8, y: 10.0 }, ar: 0.6667, ballSize: 8.6, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
   },
   {
     id: 'bb-elevation', sport: 'basketball', img: 'assets/img/basketball-3.jpg', landscape: false,
     title: 'Elevation', sub: 'Two bigs, one ball, nine thousand eyes',
     prize: 'NBA Finals Trip for 2', prizeShort: 'FINALS ×2', prizeType: 'trip', prizeImg: 'assets/prizes/nba-finals.jpg', fee: 3.5,
     closesIn: 22 * 3600, sold: 5820, cap: 13000, featured: true,
-    target: { x: 48.1, y: 7.0 }, ballSize: 5.0, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
+    target: { x: 48.1, y: 7.0 }, ar: 0.6667, ballSize: 5.0, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
   },
   {
     id: 'bb-denied', sport: 'basketball', img: 'assets/img/basketball-4.jpg', landscape: false,
     title: 'Denied', sub: 'Double block at the summit',
     prize: 'Signed Deni Avdija Jersey', prizeShort: 'AVDIJA 8', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-avdija.jpg', fee: 2.5,
     closesIn: 54 * 3600, sold: 1210, cap: 8000,
-    target: { x: 59.0, y: 8.6 }, ballSize: 11.1, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
+    target: { x: 59.0, y: 8.6 }, ar: 1.5, ballSize: 11.1, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
   },
 ];
 
@@ -137,12 +137,15 @@ const TOURNAMENT = {
   endsIn: 3 * 24 * 3600 + 11 * 3600,
 };
 
-/* Past winners strip (flavour) */
+/* Past winners wall. Illustrative only — fictional names, stock portraits,
+   labelled as such in the UI. Real winners replace this from the server. */
 const PAST_WINNERS = [
-  { name: 'Ally M.', from: 'Manchester', prize: 'Porsche 911 Carrera', week: 'W29' },
-  { name: 'Dev P.', from: 'Austin', prize: '$75,000 Cash', week: 'W30' },
-  { name: 'Sofia R.', from: 'Madrid', prize: 'World Cup Final Trip', week: 'W31' },
-  { name: 'Ken W.', from: 'Toronto', prize: 'Courtside Tickets + $10K', week: 'W32' },
+  { name: 'Ally M.',  from: 'Manchester', prize: 'Porsche 911 Carrera',    week: 'W29', sport: 'soccer',     dist: '0.41', photo: 'assets/winners/w2.jpg' },
+  { name: 'Dev P.',   from: 'Austin',     prize: '$75,000 Cash',           week: 'W30', sport: 'football',   dist: '0.58', photo: 'assets/winners/w1.jpg' },
+  { name: 'Sofia R.', from: 'Madrid',     prize: 'World Cup Final Trip',   week: 'W31', sport: 'soccer',     dist: '0.33', photo: 'assets/winners/w4.jpg' },
+  { name: 'Ken W.',   from: 'Toronto',    prize: 'Courtside Tickets + $10K', week: 'W32', sport: 'basketball', dist: '0.62', photo: 'assets/winners/w5.jpg' },
+  { name: 'Lena T.',  from: 'Berlin',     prize: 'Rolex Submariner',       week: 'W28', sport: 'basketball', dist: '0.47', photo: 'assets/winners/w6.jpg' },
+  { name: 'Marco B.', from: 'Milan',      prize: 'Super Bowl Suite ×4',    week: 'W27', sport: 'football',   dist: '0.71', photo: 'assets/winners/w3.jpg' },
 ];
 /* ============================================================
    Spot the Ball — prize artwork
@@ -319,14 +322,20 @@ const BALL_CURSOR = {
       <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
     </g>
   </svg>`,
+  /* the football foreshortens as it turns nose-on: --sx squeezes the long
+     axis from a full oval (1) down to a circle (28/47) seen end-on */
   football: `<svg viewBox="0 0 100 62" class="bc-svg">
-    <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"/>
-    <g stroke="var(--bc)" stroke-width="1.8" opacity=".85">
-      <path d="M34 31h32" stroke-width="2.4"/>
-      <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
-      <path d="M11 31c4-4 4-4 0 0M89 31h-6M17 31h-6"/>
+    <g class="fb-body">
+      <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"
+               vector-effect="non-scaling-stroke"/>
+      <g stroke="var(--bc)" stroke-width="1.8" opacity=".85" vector-effect="non-scaling-stroke">
+        <path d="M34 31h32" stroke-width="2.4"/>
+        <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
+        <path d="M89 31h-6M17 31h-6"/>
+      </g>
+      <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6"
+            fill="none" opacity=".55" vector-effect="non-scaling-stroke"/>
     </g>
-    <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6" fill="none" opacity=".55"/>
   </svg>`,
 };
 /* centre marker shared by every cursor */
@@ -389,9 +398,12 @@ const API = (() => {
   /* ---------- scoring ----------
      d = normalized distance in % of image diagonal (0..~141)
      score: 1000 at dead centre, ~exp decay, 0 beyond far miss   */
-  function distPct(a, b) {
-    const dx = a.x - b.x, dy = a.y - b.y;
-    return Math.sqrt(dx * dx + dy * dy); // % space
+  /* true geometric distance, in units of image width.
+     A raw y-percentage covers fewer pixels than an x-percentage on a landscape
+     photo, so y is scaled by the image aspect ratio before measuring. */
+  function distPct(a, b, ar = 1) {
+    const dx = a.x - b.x, dy = (a.y - b.y) * ar;
+    return Math.sqrt(dx * dx + dy * dy);
   }
   function scoreFor(d) {
     return Math.max(0, Math.round(1000 * Math.exp(-d / 9)));
@@ -409,7 +421,7 @@ const API = (() => {
       const gauss = () => (r() + r() + r() + r() - 2) * sd;
       const x = Math.min(98, Math.max(2, comp.target.x + gauss()));
       const y = Math.min(98, Math.max(2, comp.target.y + gauss()));
-      const d = distPct({ x, y }, comp.target);
+      const d = distPct({ x, y }, comp.target, comp.ar || 1);
       bots.push({ name, x, y, d, score: scoreFor(d) });
     }
     return bots.sort((a, b) => a.d - b.d);
@@ -482,7 +494,7 @@ const API = (() => {
       if (picks.length > credits) throw new Error('Not enough tickets — buy more first');
       state.credits[compId] = credits - picks.length;
       const list = state.entries[compId] || (state.entries[compId] = []);
-      picks.forEach(p => list.push({ x: p.x, y: p.y, t: Date.now() }));
+      picks.forEach(p => list.push({ x: p.x, y: p.y, a: p.a || 0, tilt: p.tilt || 0, t: Date.now() }));
       save(state);
       return { balance: state.balance, total: list.length, credits: state.credits[compId] };
     },
@@ -504,7 +516,7 @@ const API = (() => {
       const c = compById(compId);
       if (!c) return null;
       const mine = (state.entries[compId] || []).map((p, i) => {
-        const d = distPct(p, c.target);
+        const d = distPct(p, c.target, c.ar || 1);
         return { ...p, n: i + 1, d, score: scoreFor(d) };
       }).sort((a, b) => a.d - b.d);
       const bots = botEntries(c);
@@ -532,7 +544,7 @@ const API = (() => {
         if (!state.closed[c.id]) continue;
         const picks = state.entries[c.id] || [];
         if (!picks.length) continue;
-        const best = Math.max(...picks.map(p => scoreFor(distPct(p, c.target))));
+        const best = Math.max(...picks.map(p => scoreFor(distPct(p, c.target, c.ar || 1))));
         myPts += best; myComps++;
       }
       const names = [...BOT_NAMES].sort(() => r() - 0.5).slice(0, 20);
@@ -581,7 +593,10 @@ addEventListener('error', e => {
 }, true);
 
 let tickTimers = [];
-function clearTicks() { tickTimers.forEach(clearInterval); tickTimers = []; }
+function clearTicks() {
+  tickTimers.forEach(t => { if (t && t.off) t.off(); else clearInterval(t); });
+  tickTimers = [];
+}
 
 /* ---------- countdown ---------- */
 function fmtLeft(ms) {
@@ -780,9 +795,24 @@ async function viewHome(sportFilter) {
   </section>
 
   <section class="section">
-    <div class="sec-head"><h2>Recent winners</h2></div>
+    <div class="sec-head">
+      <h2>The winners' wall</h2>
+      <span class="count">illustrative · demo build</span>
+    </div>
     <div class="win-strip">
-      ${winners.map(w => `<div class="win-card"><div class="w">WEEK ${w.week.slice(1)}</div><div class="p">${esc(w.prize)}</div><div class="n">${esc(w.name)} · ${esc(w.from)}</div></div>`).join('')}
+      ${winners.map(w => `
+        <figure class="win-card">
+          <div class="wc-photo">
+            <img src="${w.photo}" alt="" loading="lazy">
+            <span class="wc-sport">${SPORTS[w.sport].icon}</span>
+            <span class="wc-week">WEEK ${w.week.slice(1)}</span>
+          </div>
+          <figcaption>
+            <div class="p">${esc(w.prize)}</div>
+            <div class="n">${esc(w.name)} · ${esc(w.from)}</div>
+            <div class="d">won by <b>${w.dist}</b> units</div>
+          </figcaption>
+        </figure>`).join('')}
     </div>
   </section>`;
 
@@ -967,12 +997,15 @@ async function renderBoard(c, submitted) {
 
         ${c.sport === 'football' ? `
         <div class="panel-card">
-          <h4>Ball angle <span class="mono" id="angLabel">0°</span></h4>
+          <h4>Ball orientation <span class="mono" id="angLabel">0° · 0°</span></h4>
           <div class="spin-row">
             <div class="spin-preview" id="spinPreview">${BALL_CURSOR.football}</div>
-            <input type="range" id="angSlider" min="0" max="359" value="0" step="1">
+            <div class="spin-axes">
+              <label>Spin<input type="range" id="angSlider" min="0" max="359" value="0" step="1"></label>
+              <label>Depth<input type="range" id="tiltSlider" min="0" max="90" value="0" step="1"></label>
+            </div>
           </div>
-          <div class="tier-hint">A football is not a sphere — set the angle you believe it was spinning at. Scroll over the photo, drag the slider, or press [ and ].</div>
+          <div class="tier-hint">A football is no sphere. <em>Spin</em> turns it in the frame; <em>depth</em> turns its nose toward you until it reads as a circle. Scroll to spin, <em>shift</em>+scroll for depth, or press [ ] and - =.</div>
         </div>` : ''}
 
         <div class="panel-card">
@@ -1011,7 +1044,7 @@ async function renderBoard(c, submitted) {
     $('#submitBtn').textContent = n ? `Lock in ${n} crosshair${n > 1 ? 's' : ''}` : 'Lock in entry';
     $('#picksList').innerHTML = [
       ...submitted.map((p, i) => `<div class="pick-row submitted"><span class="idx">${i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}</span><span class="lock">✓ locked</span></div>`),
-      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°` : ''}</span><button class="del" data-del="${i}">×</button></div>`),
+      ...picks.map((p, i) => `<div class="pick-row"><span class="idx">${submitted.length + i + 1}</span><span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°/${Math.round(p.tilt || 0)}°` : ''}</span><button class="del" data-del="${i}">×</button></div>`),
     ].join('');
     $$('[data-del]').forEach(b => b.addEventListener('click', () => { picks.splice(+b.dataset.del, 1); renderPins(); }));
   }
@@ -1020,6 +1053,7 @@ async function renderBoard(c, submitted) {
     el.className = 'pin ball-pin' + (locked ? ' submitted' : '');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    el.style.setProperty('--sx', sxFor(p.tilt || 0).toFixed(4));
     el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span><span class="n">${n}</span>`;
     if (!locked) el.addEventListener('click', e => {
       e.stopPropagation();
@@ -1028,7 +1062,8 @@ async function renderBoard(c, submitted) {
     return el;
   }
 
-  let angle = 0;   // football spin, degrees
+  let angle = 0;   // football spin in the plane, degrees
+  let tilt = 0;    // football depth rotation (0 = side on, 90 = nose on)
 
   function sizeCursor() {
     const r = board.getBoundingClientRect();
@@ -1043,14 +1078,23 @@ async function renderBoard(c, submitted) {
   addEventListener('resize', sizeCursor);
   if (img.complete) sizeCursor(); else img.addEventListener('load', sizeCursor);
 
-  function setAngle(deg) {
-    angle = ((deg % 360) + 360) % 360;
-    const cur = $('#ballCursor');
-    if (cur) cur.style.setProperty('--rot', angle + 'deg');
-    const lbl = $('#angLabel'); if (lbl) lbl.textContent = Math.round(angle) + '°';
+  /* long axis shrinks from a full oval to a circle as the nose turns toward us */
+  const sxFor = t => (28 + (47 - 28) * Math.cos(t * Math.PI / 180)) / 47;
+
+  function setOrient(deg, deep) {
+    if (deg !== null) angle = ((deg % 360) + 360) % 360;
+    if (deep !== null) tilt = Math.max(0, Math.min(90, deep));
+    const sx = sxFor(tilt);
+    [$('#ballCursor'), $('#spinPreview')].forEach(el => {
+      if (!el) return;
+      el.style.setProperty('--rot', angle + 'deg');
+      el.style.setProperty('--sx', sx.toFixed(4));
+    });
+    const lbl = $('#angLabel'); if (lbl) lbl.textContent = `${Math.round(angle)}° · ${Math.round(tilt)}°`;
     const sl = $('#angSlider'); if (sl && +sl.value !== Math.round(angle)) sl.value = Math.round(angle);
-    const pv = $('#spinPreview'); if (pv) pv.style.setProperty('--rot', angle + 'deg');
+    const tl = $('#tiltSlider'); if (tl && +tl.value !== Math.round(tilt)) tl.value = Math.round(tilt);
   }
+  const setAngle = d => setOrient(d, null);
 
   function aim(e) {
     const r = board.getBoundingClientRect();
@@ -1062,20 +1106,26 @@ async function renderBoard(c, submitted) {
     cur.style.left = cx + 'px'; cur.style.top = cy + 'px';
     coords.style.left = cx + 'px'; coords.style.top = cy + 'px';
     coords.textContent = `x ${(cx / r.width * 100).toFixed(1)} · y ${(cy / r.height * 100).toFixed(1)}`
-      + (c.sport === 'football' ? ` · ${Math.round(angle)}°` : '');
+      + (c.sport === 'football' ? ` · ${Math.round(angle)}°/${Math.round(tilt)}°` : '');
   }
 
   if (c.sport === 'football') {
     board.addEventListener('wheel', e => {
       e.preventDefault();
-      setAngle(angle + (e.deltaY > 0 ? 6 : -6));
+      const step = e.deltaY > 0 ? 6 : -6;
+      if (e.shiftKey) setOrient(null, tilt + step); else setOrient(angle + step, null);
     }, { passive: false });
-    addEventListener('keydown', e => {
-      if (e.key === '[') setAngle(angle - 6);
-      if (e.key === ']') setAngle(angle + 6);
-    });
-    $('#angSlider')?.addEventListener('input', e => setAngle(+e.target.value));
-    setAngle(0);
+    const onKey = e => {
+      if (e.key === '[') setOrient(angle - 6, null);
+      if (e.key === ']') setOrient(angle + 6, null);
+      if (e.key === '-') setOrient(null, tilt - 6);
+      if (e.key === '=' || e.key === '+') setOrient(null, tilt + 6);
+    };
+    addEventListener('keydown', onKey);
+    tickTimers.push({ off: () => removeEventListener('keydown', onKey) });
+    $('#angSlider')?.addEventListener('input', e => setOrient(+e.target.value, null));
+    $('#tiltSlider')?.addEventListener('input', e => setOrient(null, +e.target.value));
+    setOrient(0, 0);
   }
 
   board.addEventListener('mousemove', aim);
@@ -1106,7 +1156,7 @@ async function renderBoard(c, submitted) {
     const x = (pt.clientX - r.left) / r.width * 100;
     const y = (pt.clientY - r.top) / r.height * 100;
     if (x < 0 || y < 0 || x > 100 || y > 100) return;
-    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle });
+    picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle, tilt });
     renderPins();
   }
   board.addEventListener('click', e => place(e));
@@ -1269,6 +1319,8 @@ async function viewResults(id) {
     el.className = 'pin ball-pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
+    const sx = (28 + (47 - 28) * Math.cos((p.tilt || 0) * Math.PI / 180)) / 47;
+    el.style.setProperty('--sx', sx.toFixed(4));
     el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span>
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
@@ -1419,7 +1471,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 16;
+const BUILD = 18;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

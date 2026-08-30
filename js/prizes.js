@@ -173,14 +173,20 @@ const BALL_CURSOR = {
       <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
     </g>
   </svg>`,
+  /* the football foreshortens as it turns nose-on: --sx squeezes the long
+     axis from a full oval (1) down to a circle (28/47) seen end-on */
   football: `<svg viewBox="0 0 100 62" class="bc-svg">
-    <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"/>
-    <g stroke="var(--bc)" stroke-width="1.8" opacity=".85">
-      <path d="M34 31h32" stroke-width="2.4"/>
-      <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
-      <path d="M11 31c4-4 4-4 0 0M89 31h-6M17 31h-6"/>
+    <g class="fb-body">
+      <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"
+               vector-effect="non-scaling-stroke"/>
+      <g stroke="var(--bc)" stroke-width="1.8" opacity=".85" vector-effect="non-scaling-stroke">
+        <path d="M34 31h32" stroke-width="2.4"/>
+        <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
+        <path d="M89 31h-6M17 31h-6"/>
+      </g>
+      <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6"
+            fill="none" opacity=".55" vector-effect="non-scaling-stroke"/>
     </g>
-    <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6" fill="none" opacity=".55"/>
   </svg>`,
 };
 /* centre marker shared by every cursor */
