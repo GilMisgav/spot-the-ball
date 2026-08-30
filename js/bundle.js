@@ -1080,14 +1080,36 @@ async function renderBoard(c, submitted) {
 
   board.addEventListener('mousemove', aim);
   board.addEventListener('mouseleave', () => board.classList.remove('aiming'));
-  board.addEventListener('click', e => {
+
+  /* touch: drag the ball into place, lift to drop it (phones have no hover) */
+  let touchPt = null;
+  board.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    touchPt = { clientX: t.clientX, clientY: t.clientY };
+    aim(touchPt);
+  }, { passive: true });
+  board.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    touchPt = { clientX: t.clientX, clientY: t.clientY };
+    aim(touchPt);
+    e.preventDefault();            // aiming should not scroll the page
+  }, { passive: false });
+  board.addEventListener('touchend', e => {
+    e.preventDefault();            // also suppresses the synthetic click
+    if (touchPt) place(touchPt);
+    touchPt = null;
+    setTimeout(() => board.classList.remove('aiming'), 1200);
+  }, { passive: false });
+  function place(pt) {
     if (picks.length >= credits) { toast('No tickets left in hand — add more below', true); return; }
     const r = board.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width * 100;
-    const y = (e.clientY - r.top) / r.height * 100;
+    const x = (pt.clientX - r.left) / r.width * 100;
+    const y = (pt.clientY - r.top) / r.height * 100;
+    if (x < 0 || y < 0 || x > 100 || y > 100) return;
     picks.push({ x: +x.toFixed(2), y: +y.toFixed(2), a: angle });
     renderPins();
-  });
+  }
+  board.addEventListener('click', e => place(e));
 
   $('#submitBtn').addEventListener('click', async () => {
     try {
@@ -1397,7 +1419,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 15;
+const BUILD = 16;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
