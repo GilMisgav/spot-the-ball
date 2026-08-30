@@ -12,8 +12,14 @@ const API = (() => {
   /* ---------- storage ---------- */
   function load() {
     try {
+      if (location.search.includes('reset')) localStorage.removeItem(KEY);
       const s = JSON.parse(localStorage.getItem(KEY));
-      if (s && s.v === 1) return s;
+      // only trust a save whose shape still matches — otherwise start clean
+      if (s && s.v === 1 && typeof s.balance === 'number' && !isNaN(s.balance)
+          && s.entries && typeof s.entries === 'object'
+          && Array.isArray(s.tx) && typeof s.epoch === 'number') {
+        return s;
+      }
     } catch (e) { /* fresh start */ }
     return {
       v: 1,
@@ -25,9 +31,15 @@ const API = (() => {
       epoch: Date.now(),
     };
   }
-  function save(s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+  function save(s) {
+    try { localStorage.setItem(KEY, JSON.stringify(s)); }
+    catch (e) { /* private mode / quota — demo still runs in memory */ }
+  }
   let state = load();
-  state.credits = state.credits || {};   // migrate pre-credits saves
+  // migrate saves written by earlier builds
+  state.credits = state.credits || {};
+  state.closed = state.closed || {};
+  state.entries = state.entries || {};
 
   /* ---------- seeded rng (stable bot entries per competition) ---------- */
   function rng(seedStr) {

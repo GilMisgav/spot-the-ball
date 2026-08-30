@@ -350,7 +350,7 @@ async function renderGate(c) {
       const res = await API.buyTickets(c.id, qty);
       await refreshWallet(true);
       toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
-      route();   // re-enter play → board is now unlocked
+      safeRoute();   // re-enter play → board is now unlocked
     } catch (err) {
       if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
       else toast(err.message, true);
@@ -759,6 +759,28 @@ async function route() {
   setNav('home');
   return viewHome();
 }
-addEventListener('hashchange', route);
-route();
-refreshWallet();
+/* never leave a blank page: if a view throws, offer a one-click recovery */
+function crashScreen(err) {
+  app.innerHTML = `
+  <div class="how-page" style="text-align:center">
+    <h1>Something <span>jammed</span></h1>
+    <p class="lead" style="margin:0 auto 28px">The demo hit an unexpected state. Resetting clears the local
+    wallet and entries stored in this browser — the competitions themselves are untouched.</p>
+    <button class="btn big" id="crashReset">Reset the demo &amp; reload</button>
+    <p style="margin-top:22px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint)">${esc(String(err && err.message || err))}</p>
+  </div>`;
+  $('#crashReset').addEventListener('click', async () => {
+    try { await API.resetDemo(); } catch (e) { localStorage.clear(); }
+    location.hash = '#/';
+    location.reload();
+  });
+}
+
+async function safeRoute() {
+  try { await route(); }
+  catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
+}
+
+addEventListener('hashchange', safeRoute);
+safeRoute();
+refreshWallet().catch(() => {});
