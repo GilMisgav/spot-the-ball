@@ -688,9 +688,12 @@ async function viewResults(id) {
         <div class="board-shell">
           <div class="board" id="resBoard">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
+            <div class="reveal-spot" style="--tx:${target.x}%;--ty:${target.y}%"></div>
             ${ballImg ? `<img class="ball-real" src="${ballImg}" alt="" style="left:${target.x}%;top:${target.y}%;width:${ballW}%">` : ''}
+            <div class="ball-halo" style="left:${target.x}%;top:${target.y}%"></div>
+            <div class="ball-tag" style="left:${target.x}%;top:${target.y}%"><i></i><span>THE BALL</span></div>
             <div class="ballmark" style="left:${target.x}%;top:${target.y}%">
-              <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+              <span class="ring r2"></span><span class="ring r3"></span>
               ${ballImg || ballInPhoto ? '' : '<span class="ball"></span>'}
               <span class="cmark"><i class="ch"></i><i class="cv"></i><i class="cd"></i></span>
             </div>
@@ -733,6 +736,9 @@ async function viewResults(id) {
     const w = c.ballSize / 100 * rb.clientWidth;
     rb.style.setProperty('--pin-w', w + 'px');
     rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
+    rb.style.setProperty('--halo', w * 1.35 + 'px');
+    rb.style.setProperty('--spot-in', w * 1.5 + 'px');
+    rb.style.setProperty('--spot-out', w * 4.2 + 'px');
   };
   const rimg = $('img', rb);
   if (rimg.complete) sizePins(); else rimg.addEventListener('load', sizePins);
@@ -894,7 +900,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 21;
+const BUILD = 24;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

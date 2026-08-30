@@ -344,32 +344,56 @@ function footballGeom(tilt) {
 
 function buildFootball(tilt = 0) {
   const { rx, ry, nose, face } = footballGeom(tilt);
-  // laces sit on the upper surface: they shorten with the ball and fade as it
-  // turns nose-on, where you would be looking at the point instead of the seam
-  const laceHalf = rx * 0.34 * face;
-  const laceOp = (0.25 + 0.75 * face).toFixed(2);
-  const rungs = [];
-  const n = 4;
-  for (let i = 0; i < n; i++) {
-    const px = 50 - laceHalf + (2 * laceHalf) * (i + 0.5) / n;
-    rungs.push(`M${px.toFixed(1)} ${(30.3 - 5.5 * face).toFixed(1)}v${(11 * face).toFixed(1)}`);
+  const t = tilt * Math.PI / 180;
+  const side = Math.abs(Math.sin(t));       // 0 side-on, 1 nose-on
+  const cy = 30.3;
+
+  /* The equator — the ball's circular cross-section, seen edge-on when the
+     ball lies across the frame and opening into a full circle as the nose
+     swings toward the camera. This is the cue that reads as depth. */
+  const eqRx = (ry * side).toFixed(2);
+
+  /* Nose caps: the two tips. The near tip grows as the ball turns toward us. */
+  const tipX = (rx * 0.995).toFixed(2);
+  const tipCurve = (ry * 0.55 * face).toFixed(2);
+
+  /* Laces ride the upper surface and swing off-centre with the ball, then
+     fade out once you are looking at the point instead of the seam. */
+  const laceShift = (rx * 0.30 * Math.sin(t)).toFixed(2);
+  const laceHalf = rx * 0.32 * face;
+  const laceOp = (0.15 + 0.85 * face).toFixed(2);
+  let rungs = '';
+  for (let i = 0; i < 4; i++) {
+    const px = 50 + +laceShift - laceHalf + (2 * laceHalf) * (i + 0.5) / 4;
+    rungs += `M${px.toFixed(1)} ${(cy - 5.2 * face).toFixed(1)}v${(10.4 * face).toFixed(1)}`;
   }
-  // seams curve toward the silhouette edge as the ball turns
-  const seam = (rx * 0.47).toFixed(1);
+
   return `<svg viewBox="0 0 100 60.6" class="bc-svg">
-    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}"
-             fill="rgba(120,60,30,.30)" stroke="var(--bc)" stroke-width="3"/>
+    <defs>
+      <radialGradient id="fbShade" cx="34%" cy="28%" r="78%">
+        <stop offset="0" stop-color="rgba(190,110,60,.42)"/>
+        <stop offset="1" stop-color="rgba(70,32,14,.34)"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="50" cy="${cy}" rx="${rx.toFixed(2)}" ry="${ry}" fill="url(#fbShade)"
+             stroke="var(--bc)" stroke-width="3"/>
+    ${eqRx > 0.6 ? `<ellipse cx="50" cy="${cy}" rx="${eqRx}" ry="${ry}" fill="none"
+             stroke="var(--bc)" stroke-width="1.6" opacity="${(0.35 + 0.5 * side).toFixed(2)}"/>` : ''}
+    <g stroke="var(--bc)" fill="none" opacity="${(0.30 + 0.45 * face).toFixed(2)}" stroke-width="1.5">
+      <path d="M${(50 - tipX)} ${cy}q${tipCurve} -${(ry * 0.5).toFixed(1)} ${(rx * 0.34).toFixed(1)} -${(ry * 0.62).toFixed(1)}"/>
+      <path d="M${(50 - tipX)} ${cy}q${tipCurve} ${(ry * 0.5).toFixed(1)} ${(rx * 0.34).toFixed(1)} ${(ry * 0.62).toFixed(1)}"/>
+      <path d="M${(50 + +tipX)} ${cy}q-${tipCurve} -${(ry * 0.5).toFixed(1)} -${(rx * 0.34).toFixed(1)} -${(ry * 0.62).toFixed(1)}"/>
+      <path d="M${(50 + +tipX)} ${cy}q-${tipCurve} ${(ry * 0.5).toFixed(1)} -${(rx * 0.34).toFixed(1)} ${(ry * 0.62).toFixed(1)}"/>
+    </g>
     <g stroke="var(--bc)" fill="none" opacity="${laceOp}">
-      <path d="M${(50 - laceHalf).toFixed(1)} 30.3h${(laceHalf * 2).toFixed(1)}" stroke-width="2.4"/>
-      <path d="${rungs.join('')}" stroke-width="1.8"/>
+      <path d="M${(50 + +laceShift - laceHalf).toFixed(1)} ${cy}h${(laceHalf * 2).toFixed(1)}" stroke-width="2.2"/>
+      <path d="${rungs}" stroke-width="1.6"/>
     </g>
-    <g stroke="var(--bc)" fill="none" opacity="${(0.5 * face + 0.12).toFixed(2)}" stroke-width="1.6">
-      <path d="M${(50 - seam)} 12c${(seam * 0.42).toFixed(1)} 10 ${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
-      <path d="M${(50 + +seam)} 12c-${(seam * 0.42).toFixed(1)} 10 -${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
-    </g>
-    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}" fill="none"
-             stroke="rgba(255,255,255,.30)" stroke-width="1"
-             stroke-dasharray="${nose < 0 ? '4 5' : '0'}"/>
+    ${face < 0.62 ? `<ellipse cx="50" cy="${cy}" rx="${(ry * 0.20 * (1 - face)).toFixed(2)}"
+             ry="${(ry * 0.20 * (1 - face)).toFixed(2)}" fill="none" stroke="var(--bc)"
+             stroke-width="1.4" opacity="${(0.9 * (1 - face)).toFixed(2)}"/>` : ''}
+    ${nose < 0 ? `<ellipse cx="50" cy="${cy}" rx="${rx.toFixed(2)}" ry="${ry}" fill="none"
+             stroke="rgba(255,255,255,.45)" stroke-width="1.2" stroke-dasharray="3 4"/>` : ''}
   </svg>`;
 }
 BALL_CURSOR.football = buildFootball(0);
@@ -1296,9 +1320,12 @@ async function viewResults(id) {
         <div class="board-shell">
           <div class="board" id="resBoard">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
+            <div class="reveal-spot" style="--tx:${target.x}%;--ty:${target.y}%"></div>
             ${ballImg ? `<img class="ball-real" src="${ballImg}" alt="" style="left:${target.x}%;top:${target.y}%;width:${ballW}%">` : ''}
+            <div class="ball-halo" style="left:${target.x}%;top:${target.y}%"></div>
+            <div class="ball-tag" style="left:${target.x}%;top:${target.y}%"><i></i><span>THE BALL</span></div>
             <div class="ballmark" style="left:${target.x}%;top:${target.y}%">
-              <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span>
+              <span class="ring r2"></span><span class="ring r3"></span>
               ${ballImg || ballInPhoto ? '' : '<span class="ball"></span>'}
               <span class="cmark"><i class="ch"></i><i class="cv"></i><i class="cd"></i></span>
             </div>
@@ -1341,6 +1368,9 @@ async function viewResults(id) {
     const w = c.ballSize / 100 * rb.clientWidth;
     rb.style.setProperty('--pin-w', w + 'px');
     rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
+    rb.style.setProperty('--halo', w * 1.35 + 'px');
+    rb.style.setProperty('--spot-in', w * 1.5 + 'px');
+    rb.style.setProperty('--spot-out', w * 4.2 + 'px');
   };
   const rimg = $('img', rb);
   if (rimg.complete) sizePins(); else rimg.addEventListener('load', sizePins);
@@ -1502,7 +1532,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 21;
+const BUILD = 24;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
