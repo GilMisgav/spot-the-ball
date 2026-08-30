@@ -160,34 +160,67 @@ const PRIZE_ART = (() => {
    ============================================================ */
 const BALL_CURSOR = {
   soccer: `<svg viewBox="0 0 100 100" class="bc-svg">
-    <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
-    <path d="M50 24 l19.7 14.3-7.5 23.1H37.8l-7.5-23.1z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="50" cy="50" r="50" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
+    <path d="M50 22 l20.8 15.1-7.9 24.4H37.1l-7.9-24.4z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
     <g stroke="var(--bc)" stroke-width="1.6" opacity=".75">
-      <path d="M50 24V6M69.7 38.3 86.8 26M62.2 61.4 76.6 84M37.8 61.4 23.4 84M30.3 38.3 13.2 26"/>
+      <path d="M50 22V3M70.8 37.1 89.5 23.5M63.1 61.5 78 86.5M36.9 61.5 22 86.5M29.2 37.1 10.5 23.5"/>
     </g>
   </svg>`,
   basketball: `<svg viewBox="0 0 100 100" class="bc-svg">
-    <circle cx="50" cy="50" r="46" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
+    <circle cx="50" cy="50" r="50" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
     <g stroke="var(--bc)" stroke-width="1.8" fill="none" opacity=".8">
-      <path d="M4 50h92M50 4v92"/>
-      <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
+      <path d="M1.5 50h97M50 1.5v97"/>
+      <path d="M16 16c18 18 18 50 0 68M84 16c-18 18-18 50 0 68"/>
     </g>
   </svg>`,
-  /* the football foreshortens as it turns nose-on: --sx squeezes the long
-     axis from a full oval (1) down to a circle (28/47) seen end-on */
-  football: `<svg viewBox="0 0 100 62" class="bc-svg">
-    <g class="fb-body">
-      <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"
-               vector-effect="non-scaling-stroke"/>
-      <g stroke="var(--bc)" stroke-width="1.8" opacity=".85" vector-effect="non-scaling-stroke">
-        <path d="M34 31h32" stroke-width="2.4"/>
-        <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
-        <path d="M89 31h-6M17 31h-6"/>
-      </g>
-      <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6"
-            fill="none" opacity=".55" vector-effect="non-scaling-stroke"/>
-    </g>
-  </svg>`,
+  /* Football is drawn from real geometry, not a squeeze.
+     A prolate spheroid (a=47, b=28) whose long axis points away from the
+     camera by `tilt` projects to an ellipse of semi-axes
+       rx = sqrt(a^2 cos^2 t + b^2 sin^2 t),  ry = b
+     so it passes smoothly from a full oval (0deg) to a circle (90deg) and on
+     round the back through 360deg. buildFootball() returns that exact shape. */
+  football: '',
 };
 /* centre marker shared by every cursor */
 const BALL_CENTRE = `<span class="bc-dot"><i></i><i></i></span>`;
+
+
+/* ---- football: exact silhouette for any 3D orientation ---- */
+function footballGeom(tilt) {
+  const A = 50, B = 30.3;   // 1.65:1, the real proportion; fills the box exactly
+  const t = tilt * Math.PI / 180;
+  const rx = Math.sqrt(A * A * Math.cos(t) ** 2 + B * B * Math.sin(t) ** 2);
+  return { rx, ry: B, nose: Math.cos(t), face: Math.abs(Math.cos(t)) };
+}
+
+function buildFootball(tilt = 0) {
+  const { rx, ry, nose, face } = footballGeom(tilt);
+  // laces sit on the upper surface: they shorten with the ball and fade as it
+  // turns nose-on, where you would be looking at the point instead of the seam
+  const laceHalf = rx * 0.34 * face;
+  const laceOp = (0.25 + 0.75 * face).toFixed(2);
+  const rungs = [];
+  const n = 4;
+  for (let i = 0; i < n; i++) {
+    const px = 50 - laceHalf + (2 * laceHalf) * (i + 0.5) / n;
+    rungs.push(`M${px.toFixed(1)} ${(30.3 - 5.5 * face).toFixed(1)}v${(11 * face).toFixed(1)}`);
+  }
+  // seams curve toward the silhouette edge as the ball turns
+  const seam = (rx * 0.47).toFixed(1);
+  return `<svg viewBox="0 0 100 60.6" class="bc-svg">
+    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}"
+             fill="rgba(120,60,30,.30)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" fill="none" opacity="${laceOp}">
+      <path d="M${(50 - laceHalf).toFixed(1)} 30.3h${(laceHalf * 2).toFixed(1)}" stroke-width="2.4"/>
+      <path d="${rungs.join('')}" stroke-width="1.8"/>
+    </g>
+    <g stroke="var(--bc)" fill="none" opacity="${(0.5 * face + 0.12).toFixed(2)}" stroke-width="1.6">
+      <path d="M${(50 - seam)} 12c${(seam * 0.42).toFixed(1)} 10 ${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
+      <path d="M${(50 + +seam)} 12c-${(seam * 0.42).toFixed(1)} 10 -${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
+    </g>
+    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}" fill="none"
+             stroke="rgba(255,255,255,.30)" stroke-width="1"
+             stroke-dasharray="${nose < 0 ? '4 5' : '0'}"/>
+  </svg>`;
+}
+BALL_CURSOR.football = buildFootball(0);

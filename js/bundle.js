@@ -39,28 +39,28 @@ const COMPETITIONS = [
     title: 'El Diez', sub: 'The №10 strikes — keeper at full flight',
     prize: 'VIP World Cup Final · Trip for 2', prizeShort: 'WC FINAL ×2', prizeType: 'trip', prizeImg: 'assets/prizes/worldcup-trophy.jpg', fee: 3.0,
     closesIn: 5 * 3600 + 42 * 60, sold: 10930, cap: 15000, featured: true,
-    target: { x: 14.0, y: 77.3 }, ar: 0.6667, ballSize: 5.6, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
+    target: { x: 14.0, y: 77.3 }, ar: 0.6667, ballSize: 5.8, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
   },
   {
     id: 'sc-stretch', sport: 'soccer', img: 'assets/img/soccer-3.jpg', landscape: true,
     title: 'Full Stretch', sub: 'Beaten at the near post? You be the judge',
     prize: 'Rolex Day-Date Platinum', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex.jpg', fee: 2.5,
     closesIn: 9 * 3600 + 5 * 60, sold: 3204, cap: 8000,
-    target: { x: 22.6, y: 82.6 }, ar: 0.6667, ballSize: 8.4, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
+    target: { x: 22.6, y: 82.6 }, ar: 0.6667, ballSize: 7.2, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
   },
   {
     id: 'sc-slide', sport: 'soccer', img: 'assets/img/soccer-4.jpg', landscape: true,
     title: 'The Slide', sub: 'Last-ditch block on the edge of the area',
     prize: 'AirPods Max', prizeShort: 'AIRPODS MAX', prizeType: 'phone', prizeImg: 'assets/prizes/airpods.jpg', fee: 3.0,
     closesIn: 26 * 3600, sold: 5127, cap: 10000,
-    target: { x: 18.4, y: 72.2 }, ar: 0.6667, ballSize: 6.6, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
+    target: { x: 18.4, y: 72.2 }, ar: 0.6667, ballSize: 6.9, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
   },
   {
     id: 'sc-firsttouch', sport: 'soccer', img: 'assets/img/soccer-5.jpg', landscape: true,
     title: 'First Touch', sub: 'Cross whipped in — who gets there first?',
     prize: 'Tesla Model Y', prizeShort: 'TESLA', prizeType: 'car', prizeImg: 'assets/prizes/tesla.jpg', fee: 3.5,
     closesIn: 49 * 3600, sold: 1980, cap: 14000,
-    target: { x: 46.1, y: 20.0 }, ar: 0.6667, ballSize: 5.4, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
+    target: { x: 46.1, y: 20.0 }, ar: 0.6667, ballSize: 6.1, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
   },
   // ---------------- FOOTBALL ----------------
   {
@@ -68,21 +68,21 @@ const COMPETITIONS = [
     title: 'Pocket Pressure', sub: 'Release under the rush — follow the spiral',
     prize: '$100,000 Cash', prizeShort: '$100K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-100s.jpg', fee: 3.5,
     closesIn: 3 * 3600 + 31 * 60, sold: 14208, cap: 20000, featured: true,
-    target: { x: 71.9, y: 9.5 }, ar: 0.6667, ballSize: 10.0, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
+    target: { x: 71.9, y: 9.5 }, ar: 0.6667, ballSize: 10.3, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
   },
   {
     id: 'fb-fourthdown', sport: 'football', img: 'assets/img/football-2.jpg', landscape: true,
     title: 'Fourth Down', sub: 'The pass breakup that decided the bowl',
     prize: 'Super Bowl Suite for 4', prizeShort: 'SB SUITE ×4', prizeType: 'suite', prizeImg: 'assets/prizes/stadium-tunnel.jpg', fee: 3.0,
     closesIn: 12 * 3600 + 18 * 60, sold: 6741, cap: 16000,
-    target: { x: 44.4, y: 46.7 }, ar: 0.6667, ballSize: 8.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
+    target: { x: 44.4, y: 46.7 }, ar: 0.6667, ballSize: 9.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
   },
   {
     id: 'fb-looseball', sport: 'football', img: 'assets/img/football-3.jpg', landscape: true,
     title: 'Loose Ball', sub: 'Fumble! Every eye on the turf',
     prize: 'Rolex Day-Date Everose', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex-everose.jpg', fee: 2.5,
     closesIn: 31 * 3600, sold: 2456, cap: 9000,
-    target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 7.0, ballInPhoto: true,
+    target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 5.6, ballInPhoto: true,
   },
   // ---------------- BASKETBALL ----------------
   {
@@ -90,28 +90,28 @@ const COMPETITIONS = [
     title: 'Top of the Key', sub: 'Bird\'s-eye over the rim — swish or rattle?',
     prize: 'Courtside Season Tickets', prizeShort: 'COURTSIDE', prizeType: 'courtside', prizeImg: 'assets/prizes/courtside.jpg', fee: 3.0,
     closesIn: 4 * 3600 + 3 * 60, sold: 7311, cap: 12000,
-    target: { x: 46.5, y: 87.8 }, ar: 0.6667, ballSize: 9.1, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
+    target: { x: 46.5, y: 87.8 }, ar: 0.6667, ballSize: 9.4, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
   },
   {
     id: 'bb-rimrunner', sport: 'basketball', img: 'assets/img/basketball-2.jpg', landscape: true,
     title: 'Rim Runner', sub: 'Traffic in the paint, first half fire',
     prize: 'Framed Signed Kobe Jersey', prizeShort: 'KOBE 24', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-kobe.jpg', fee: 3.0,
     closesIn: 8 * 3600 + 47 * 60, sold: 4102, cap: 10000,
-    target: { x: 48.8, y: 10.0 }, ar: 0.6667, ballSize: 8.6, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
+    target: { x: 48.8, y: 10.0 }, ar: 0.6667, ballSize: 8.9, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
   },
   {
     id: 'bb-elevation', sport: 'basketball', img: 'assets/img/basketball-3.jpg', landscape: false,
     title: 'Elevation', sub: 'Two bigs, one ball, nine thousand eyes',
     prize: 'NBA Finals Trip for 2', prizeShort: 'FINALS ×2', prizeType: 'trip', prizeImg: 'assets/prizes/nba-finals.jpg', fee: 3.5,
     closesIn: 22 * 3600, sold: 5820, cap: 13000, featured: true,
-    target: { x: 48.1, y: 7.0 }, ar: 0.6667, ballSize: 5.0, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
+    target: { x: 48.1, y: 7.0 }, ar: 0.6667, ballSize: 5.1, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
   },
   {
     id: 'bb-denied', sport: 'basketball', img: 'assets/img/basketball-4.jpg', landscape: false,
     title: 'Denied', sub: 'Double block at the summit',
     prize: 'Signed Deni Avdija Jersey', prizeShort: 'AVDIJA 8', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-avdija.jpg', fee: 2.5,
     closesIn: 54 * 3600, sold: 1210, cap: 8000,
-    target: { x: 59.0, y: 8.6 }, ar: 1.5, ballSize: 11.1, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
+    target: { x: 59.0, y: 8.6 }, ar: 1.5, ballSize: 10.9, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
   },
 ];
 
@@ -309,37 +309,70 @@ const PRIZE_ART = (() => {
    ============================================================ */
 const BALL_CURSOR = {
   soccer: `<svg viewBox="0 0 100 100" class="bc-svg">
-    <circle cx="50" cy="50" r="46" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
-    <path d="M50 24 l19.7 14.3-7.5 23.1H37.8l-7.5-23.1z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="50" cy="50" r="50" fill="rgba(255,255,255,.16)" stroke="var(--bc)" stroke-width="3"/>
+    <path d="M50 22 l20.8 15.1-7.9 24.4H37.1l-7.9-24.4z" fill="rgba(10,13,19,.4)" stroke="var(--bc)" stroke-width="1.6" stroke-linejoin="round"/>
     <g stroke="var(--bc)" stroke-width="1.6" opacity=".75">
-      <path d="M50 24V6M69.7 38.3 86.8 26M62.2 61.4 76.6 84M37.8 61.4 23.4 84M30.3 38.3 13.2 26"/>
+      <path d="M50 22V3M70.8 37.1 89.5 23.5M63.1 61.5 78 86.5M36.9 61.5 22 86.5M29.2 37.1 10.5 23.5"/>
     </g>
   </svg>`,
   basketball: `<svg viewBox="0 0 100 100" class="bc-svg">
-    <circle cx="50" cy="50" r="46" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
+    <circle cx="50" cy="50" r="50" fill="rgba(255,138,40,.20)" stroke="var(--bc)" stroke-width="3"/>
     <g stroke="var(--bc)" stroke-width="1.8" fill="none" opacity=".8">
-      <path d="M4 50h92M50 4v92"/>
-      <path d="M18 18c17 17 17 47 0 64M82 18c-17 17-17 47 0 64"/>
+      <path d="M1.5 50h97M50 1.5v97"/>
+      <path d="M16 16c18 18 18 50 0 68M84 16c-18 18-18 50 0 68"/>
     </g>
   </svg>`,
-  /* the football foreshortens as it turns nose-on: --sx squeezes the long
-     axis from a full oval (1) down to a circle (28/47) seen end-on */
-  football: `<svg viewBox="0 0 100 62" class="bc-svg">
-    <g class="fb-body">
-      <ellipse cx="50" cy="31" rx="47" ry="28" fill="rgba(120,60,30,.28)" stroke="var(--bc)" stroke-width="3"
-               vector-effect="non-scaling-stroke"/>
-      <g stroke="var(--bc)" stroke-width="1.8" opacity=".85" vector-effect="non-scaling-stroke">
-        <path d="M34 31h32" stroke-width="2.4"/>
-        <path d="M40 25.5v11M46.5 25.5v11M53 25.5v11M59.5 25.5v11"/>
-        <path d="M89 31h-6M17 31h-6"/>
-      </g>
-      <path d="M22 14c9 10 9 24 0 34M78 14c-9 10-9 24 0 34" stroke="var(--bc)" stroke-width="1.6"
-            fill="none" opacity=".55" vector-effect="non-scaling-stroke"/>
-    </g>
-  </svg>`,
+  /* Football is drawn from real geometry, not a squeeze.
+     A prolate spheroid (a=47, b=28) whose long axis points away from the
+     camera by `tilt` projects to an ellipse of semi-axes
+       rx = sqrt(a^2 cos^2 t + b^2 sin^2 t),  ry = b
+     so it passes smoothly from a full oval (0deg) to a circle (90deg) and on
+     round the back through 360deg. buildFootball() returns that exact shape. */
+  football: '',
 };
 /* centre marker shared by every cursor */
 const BALL_CENTRE = `<span class="bc-dot"><i></i><i></i></span>`;
+
+
+/* ---- football: exact silhouette for any 3D orientation ---- */
+function footballGeom(tilt) {
+  const A = 50, B = 30.3;   // 1.65:1, the real proportion; fills the box exactly
+  const t = tilt * Math.PI / 180;
+  const rx = Math.sqrt(A * A * Math.cos(t) ** 2 + B * B * Math.sin(t) ** 2);
+  return { rx, ry: B, nose: Math.cos(t), face: Math.abs(Math.cos(t)) };
+}
+
+function buildFootball(tilt = 0) {
+  const { rx, ry, nose, face } = footballGeom(tilt);
+  // laces sit on the upper surface: they shorten with the ball and fade as it
+  // turns nose-on, where you would be looking at the point instead of the seam
+  const laceHalf = rx * 0.34 * face;
+  const laceOp = (0.25 + 0.75 * face).toFixed(2);
+  const rungs = [];
+  const n = 4;
+  for (let i = 0; i < n; i++) {
+    const px = 50 - laceHalf + (2 * laceHalf) * (i + 0.5) / n;
+    rungs.push(`M${px.toFixed(1)} ${(30.3 - 5.5 * face).toFixed(1)}v${(11 * face).toFixed(1)}`);
+  }
+  // seams curve toward the silhouette edge as the ball turns
+  const seam = (rx * 0.47).toFixed(1);
+  return `<svg viewBox="0 0 100 60.6" class="bc-svg">
+    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}"
+             fill="rgba(120,60,30,.30)" stroke="var(--bc)" stroke-width="3"/>
+    <g stroke="var(--bc)" fill="none" opacity="${laceOp}">
+      <path d="M${(50 - laceHalf).toFixed(1)} 30.3h${(laceHalf * 2).toFixed(1)}" stroke-width="2.4"/>
+      <path d="${rungs.join('')}" stroke-width="1.8"/>
+    </g>
+    <g stroke="var(--bc)" fill="none" opacity="${(0.5 * face + 0.12).toFixed(2)}" stroke-width="1.6">
+      <path d="M${(50 - seam)} 12c${(seam * 0.42).toFixed(1)} 10 ${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
+      <path d="M${(50 + +seam)} 12c-${(seam * 0.42).toFixed(1)} 10 -${(seam * 0.42).toFixed(1)} 24 0 34.8"/>
+    </g>
+    <ellipse cx="50" cy="30.3" rx="${rx.toFixed(2)}" ry="${ry}" fill="none"
+             stroke="rgba(255,255,255,.30)" stroke-width="1"
+             stroke-dasharray="${nose < 0 ? '4 5' : '0'}"/>
+  </svg>`;
+}
+BALL_CURSOR.football = buildFootball(0);
 /* ============================================================
    SPOTTED.club — mock API layer
    Every call returns a Promise and touches localStorage only.
@@ -972,7 +1005,7 @@ async function renderBoard(c, submitted) {
           <div class="board" id="board">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
             <div class="hairV"></div><div class="hairH"></div>
-            <div class="ball-cursor" id="ballCursor">${BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
+            <div class="ball-cursor" id="ballCursor">${c.sport === "football" ? buildFootball(0) : BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
             <div class="coords"></div>
           </div>
           <div class="board-hint">
@@ -999,10 +1032,10 @@ async function renderBoard(c, submitted) {
         <div class="panel-card">
           <h4>Ball orientation <span class="mono" id="angLabel">0° · 0°</span></h4>
           <div class="spin-row">
-            <div class="spin-preview" id="spinPreview">${BALL_CURSOR.football}</div>
+            <div class="spin-preview" id="spinPreview">${buildFootball(0)}</div>
             <div class="spin-axes">
               <label>Spin<input type="range" id="angSlider" min="0" max="359" value="0" step="1"></label>
-              <label>Depth<input type="range" id="tiltSlider" min="0" max="90" value="0" step="1"></label>
+              <label>Depth<input type="range" id="tiltSlider" min="0" max="359" value="0" step="1"></label>
             </div>
           </div>
           <div class="tier-hint">A football is no sphere. <em>Spin</em> turns it in the frame; <em>depth</em> turns its nose toward you until it reads as a circle. Scroll to spin, <em>shift</em>+scroll for depth, or press [ ] and - =.</div>
@@ -1053,8 +1086,8 @@ async function renderBoard(c, submitted) {
     el.className = 'pin ball-pin' + (locked ? ' submitted' : '');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
-    el.style.setProperty('--sx', sxFor(p.tilt || 0).toFixed(4));
-    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span><span class="n">${n}</span>`;
+    const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
+    el.innerHTML = `${art}<span class="d"></span><span class="n">${n}</span>`;
     if (!locked) el.addEventListener('click', e => {
       e.stopPropagation();
       picks = picks.filter(q => q !== p); renderPins();
@@ -1071,24 +1104,23 @@ async function renderBoard(c, submitted) {
     const cur = $('#ballCursor');
     if (!cur) return;
     cur.style.width = w + 'px';
-    cur.style.height = (c.sport === 'football' ? w * 0.62 : w) + 'px';
+    cur.style.height = (c.sport === 'football' ? w * 0.606 : w) + 'px';
     board.style.setProperty('--pin-w', w + 'px');
-    board.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+    board.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
   }
   addEventListener('resize', sizeCursor);
   if (img.complete) sizeCursor(); else img.addEventListener('load', sizeCursor);
 
-  /* long axis shrinks from a full oval to a circle as the nose turns toward us */
-  const sxFor = t => (28 + (47 - 28) * Math.cos(t * Math.PI / 180)) / 47;
-
+  /* redraw the exact silhouette for the current depth, then spin it in-plane */
   function setOrient(deg, deep) {
     if (deg !== null) angle = ((deg % 360) + 360) % 360;
-    if (deep !== null) tilt = Math.max(0, Math.min(90, deep));
-    const sx = sxFor(tilt);
+    if (deep !== null) tilt = ((deep % 360) + 360) % 360;
+    const svg = buildFootball(tilt);
     [$('#ballCursor'), $('#spinPreview')].forEach(el => {
       if (!el) return;
       el.style.setProperty('--rot', angle + 'deg');
-      el.style.setProperty('--sx', sx.toFixed(4));
+      const dot = el.querySelector('.bc-dot');
+      el.innerHTML = svg + (dot ? BALL_CENTRE : '');
     });
     const lbl = $('#angLabel'); if (lbl) lbl.textContent = `${Math.round(angle)}° · ${Math.round(tilt)}°`;
     const sl = $('#angSlider'); if (sl && +sl.value !== Math.round(angle)) sl.value = Math.round(angle);
@@ -1308,7 +1340,7 @@ async function viewResults(id) {
   const sizePins = () => {
     const w = c.ballSize / 100 * rb.clientWidth;
     rb.style.setProperty('--pin-w', w + 'px');
-    rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+    rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
   };
   const rimg = $('img', rb);
   if (rimg.complete) sizePins(); else rimg.addEventListener('load', sizePins);
@@ -1319,9 +1351,8 @@ async function viewResults(id) {
     el.className = 'pin ball-pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
-    const sx = (28 + (47 - 28) * Math.cos((p.tilt || 0) * Math.PI / 180)) / 47;
-    el.style.setProperty('--sx', sx.toFixed(4));
-    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span>
+    const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
+    el.innerHTML = `${art}<span class="d"></span>
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
   });
@@ -1471,7 +1502,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 18;
+const BUILD = 21;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

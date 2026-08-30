@@ -652,10 +652,6 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 .stepper b { min-width: 36px; text-align: center; font-family: var(--mono); font-size: 16px; }
 
 /* football orientation: in-plane spin + depth foreshortening */
-.bc-svg .fb-body {
-  transform-box: fill-box; transform-origin: center;
-  transform: scaleX(var(--sx, 1));
-}
 .spin-row { display: flex; align-items: center; gap: 14px; }
 .spin-axes { flex: 1; display: flex; flex-direction: column; gap: 11px; }
 .spin-axes label {

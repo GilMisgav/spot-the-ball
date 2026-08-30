@@ -397,7 +397,7 @@ async function renderBoard(c, submitted) {
           <div class="board" id="board">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
             <div class="hairV"></div><div class="hairH"></div>
-            <div class="ball-cursor" id="ballCursor">${BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
+            <div class="ball-cursor" id="ballCursor">${c.sport === "football" ? buildFootball(0) : BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
             <div class="coords"></div>
           </div>
           <div class="board-hint">
@@ -424,10 +424,10 @@ async function renderBoard(c, submitted) {
         <div class="panel-card">
           <h4>Ball orientation <span class="mono" id="angLabel">0° · 0°</span></h4>
           <div class="spin-row">
-            <div class="spin-preview" id="spinPreview">${BALL_CURSOR.football}</div>
+            <div class="spin-preview" id="spinPreview">${buildFootball(0)}</div>
             <div class="spin-axes">
               <label>Spin<input type="range" id="angSlider" min="0" max="359" value="0" step="1"></label>
-              <label>Depth<input type="range" id="tiltSlider" min="0" max="90" value="0" step="1"></label>
+              <label>Depth<input type="range" id="tiltSlider" min="0" max="359" value="0" step="1"></label>
             </div>
           </div>
           <div class="tier-hint">A football is no sphere. <em>Spin</em> turns it in the frame; <em>depth</em> turns its nose toward you until it reads as a circle. Scroll to spin, <em>shift</em>+scroll for depth, or press [ ] and - =.</div>
@@ -478,8 +478,8 @@ async function renderBoard(c, submitted) {
     el.className = 'pin ball-pin' + (locked ? ' submitted' : '');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
-    el.style.setProperty('--sx', sxFor(p.tilt || 0).toFixed(4));
-    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span><span class="n">${n}</span>`;
+    const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
+    el.innerHTML = `${art}<span class="d"></span><span class="n">${n}</span>`;
     if (!locked) el.addEventListener('click', e => {
       e.stopPropagation();
       picks = picks.filter(q => q !== p); renderPins();
@@ -496,24 +496,23 @@ async function renderBoard(c, submitted) {
     const cur = $('#ballCursor');
     if (!cur) return;
     cur.style.width = w + 'px';
-    cur.style.height = (c.sport === 'football' ? w * 0.62 : w) + 'px';
+    cur.style.height = (c.sport === 'football' ? w * 0.606 : w) + 'px';
     board.style.setProperty('--pin-w', w + 'px');
-    board.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+    board.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
   }
   addEventListener('resize', sizeCursor);
   if (img.complete) sizeCursor(); else img.addEventListener('load', sizeCursor);
 
-  /* long axis shrinks from a full oval to a circle as the nose turns toward us */
-  const sxFor = t => (28 + (47 - 28) * Math.cos(t * Math.PI / 180)) / 47;
-
+  /* redraw the exact silhouette for the current depth, then spin it in-plane */
   function setOrient(deg, deep) {
     if (deg !== null) angle = ((deg % 360) + 360) % 360;
-    if (deep !== null) tilt = Math.max(0, Math.min(90, deep));
-    const sx = sxFor(tilt);
+    if (deep !== null) tilt = ((deep % 360) + 360) % 360;
+    const svg = buildFootball(tilt);
     [$('#ballCursor'), $('#spinPreview')].forEach(el => {
       if (!el) return;
       el.style.setProperty('--rot', angle + 'deg');
-      el.style.setProperty('--sx', sx.toFixed(4));
+      const dot = el.querySelector('.bc-dot');
+      el.innerHTML = svg + (dot ? BALL_CENTRE : '');
     });
     const lbl = $('#angLabel'); if (lbl) lbl.textContent = `${Math.round(angle)}° · ${Math.round(tilt)}°`;
     const sl = $('#angSlider'); if (sl && +sl.value !== Math.round(angle)) sl.value = Math.round(angle);
@@ -733,7 +732,7 @@ async function viewResults(id) {
   const sizePins = () => {
     const w = c.ballSize / 100 * rb.clientWidth;
     rb.style.setProperty('--pin-w', w + 'px');
-    rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.62 : w) + 'px');
+    rb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
   };
   const rimg = $('img', rb);
   if (rimg.complete) sizePins(); else rimg.addEventListener('load', sizePins);
@@ -744,9 +743,8 @@ async function viewResults(id) {
     el.className = 'pin ball-pin' + (i === 0 ? ' best' : ' submitted');
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
-    const sx = (28 + (47 - 28) * Math.cos((p.tilt || 0) * Math.PI / 180)) / 47;
-    el.style.setProperty('--sx', sx.toFixed(4));
-    el.innerHTML = `${BALL_CURSOR[c.sport]}<span class="d"></span>
+    const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
+    el.innerHTML = `${art}<span class="d"></span>
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
   });
@@ -896,7 +894,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 18;
+const BUILD = 21;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
