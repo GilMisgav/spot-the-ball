@@ -564,6 +564,18 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 .pin.submitted { cursor: default; }
 @keyframes pinPop { from { transform: scale(.2); opacity: 0 } to { transform: none; opacity: 1 } }
 
+
+/* a ball-sized pin must not block its neighbours: the art is inert and only a
+   small centre button removes the pin */
+.pin.ball-pin { pointer-events: none; }
+.pin.ball-pin .pin-hit {
+  position: absolute; left: 50%; top: 50%; width: 34%; height: 34%;
+  min-width: 14px; min-height: 14px; transform: translate(-50%, -50%);
+  border: none; background: transparent; border-radius: 50%;
+  pointer-events: auto; cursor: pointer; padding: 0;
+}
+.pin.ball-pin .pin-hit:hover { background: rgba(255,93,108,.35); box-shadow: 0 0 0 1px var(--danger); }
+
 /* revealed ball + rings on results */
 .ballmark { position: absolute; z-index: 11; width: 0; height: 0; }
 .ballmark .ring {

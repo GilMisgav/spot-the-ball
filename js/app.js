@@ -479,8 +479,11 @@ async function renderBoard(c, submitted) {
     el.style.left = p.x + '%'; el.style.top = p.y + '%';
     el.style.setProperty('--rot', (p.a || 0) + 'deg');
     const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
-    el.innerHTML = `${art}<span class="d"></span><span class="n">${n}</span>`;
-    if (!locked) el.addEventListener('click', e => {
+    // only the small centre disc takes clicks — a ball-sized hit area would
+    // swallow every attempt to place a neighbouring pin
+    el.innerHTML = `${art}<span class="d"></span><span class="n">${n}</span>` +
+      (locked ? '' : '<button class="pin-hit" title="Take this crosshair back"></button>');
+    if (!locked) el.querySelector('.pin-hit').addEventListener('click', e => {
       e.stopPropagation();
       picks = picks.filter(q => q !== p); renderPins();
     });
@@ -900,7 +903,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 24;
+const BUILD = 25;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
