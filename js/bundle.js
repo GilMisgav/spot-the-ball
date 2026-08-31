@@ -31,35 +31,35 @@ const COMPETITIONS = [
     id: 'sc-freekick', sport: 'soccer', img: 'assets/img/soccer-1.jpg', landscape: true,
     title: 'The Wall', sub: 'World Cup qualifier · set-piece chaos in the box',
     prize: '$50,000 Cash', prizeShort: '$50K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-roll.jpg', fee: 3.0,
-    closesIn: 2 * 3600 + 14 * 60, sold: 8412, cap: 12000,
+    revealDow: 6, closesIn: 2 * 3600 + 14 * 60, sold: 8412, cap: 12000,
     target: { x: 9.9, y: 50.4 }, ar: 0.6667, ballSize: 4.3, ballImg: 'assets/balls/sc-freekick.png', ballW: 9.46,
   },
   {
     id: 'sc-eldiez', sport: 'soccer', img: 'assets/img/soccer-2.jpg', landscape: true,
     title: 'El Diez', sub: 'The №10 strikes — keeper at full flight',
     prize: 'VIP World Cup Final · Trip for 2', prizeShort: 'WC FINAL ×2', prizeType: 'trip', prizeImg: 'assets/prizes/worldcup-trophy.jpg', fee: 3.0,
-    closesIn: 5 * 3600 + 42 * 60, sold: 10930, cap: 15000, featured: true,
+    revealDow: 6, closesIn: 5 * 3600 + 42 * 60, sold: 10930, cap: 15000, featured: true,
     target: { x: 14.0, y: 77.3 }, ar: 0.6667, ballSize: 5.8, ballImg: 'assets/balls/sc-eldiez.png', ballW: 12.27,
   },
   {
     id: 'sc-stretch', sport: 'soccer', img: 'assets/img/soccer-3.jpg', landscape: true,
     title: 'Full Stretch', sub: 'Beaten at the near post? You be the judge',
     prize: 'Rolex Day-Date Platinum', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex.jpg', fee: 2.5,
-    closesIn: 9 * 3600 + 5 * 60, sold: 3204, cap: 8000,
+    revealDow: 0, closesIn: 9 * 3600 + 5 * 60, sold: 3204, cap: 8000,
     target: { x: 22.6, y: 82.6 }, ar: 0.6667, ballSize: 7.2, ballImg: 'assets/balls/sc-stretch.png', ballW: 18.46,
   },
   {
     id: 'sc-slide', sport: 'soccer', img: 'assets/img/soccer-4.jpg', landscape: true,
     title: 'The Slide', sub: 'Last-ditch block on the edge of the area',
     prize: 'AirPods Max', prizeShort: 'AIRPODS MAX', prizeType: 'phone', prizeImg: 'assets/prizes/airpods.jpg', fee: 3.0,
-    closesIn: 26 * 3600, sold: 5127, cap: 10000,
+    revealDow: 6, closesIn: 26 * 3600, sold: 5127, cap: 10000,
     target: { x: 18.4, y: 72.2 }, ar: 0.6667, ballSize: 6.9, ballImg: 'assets/balls/sc-slide.png', ballW: 14.52,
   },
   {
     id: 'sc-firsttouch', sport: 'soccer', img: 'assets/img/soccer-5.jpg', landscape: true,
     title: 'First Touch', sub: 'Cross whipped in — who gets there first?',
     prize: 'Tesla Model Y', prizeShort: 'TESLA', prizeType: 'car', prizeImg: 'assets/prizes/tesla.jpg', fee: 3.5,
-    closesIn: 49 * 3600, sold: 1980, cap: 14000,
+    revealDow: 0, closesIn: 49 * 3600, sold: 1980, cap: 14000,
     target: { x: 46.1, y: 20.0 }, ar: 0.6667, ballSize: 6.1, ballImg: 'assets/balls/sc-firsttouch.png', ballW: 11.96,
   },
   // ---------------- FOOTBALL ----------------
@@ -67,21 +67,21 @@ const COMPETITIONS = [
     id: 'fb-pocket', sport: 'football', img: 'assets/img/football-1.jpg', landscape: true,
     title: 'Pocket Pressure', sub: 'Release under the rush — follow the spiral',
     prize: '$100,000 Cash', prizeShort: '$100K', prizeType: 'cash', prizeImg: 'assets/prizes/cash-100s.jpg', fee: 3.5,
-    closesIn: 3 * 3600 + 31 * 60, sold: 14208, cap: 20000, featured: true,
+    revealDow: 0, closesIn: 3 * 3600 + 31 * 60, sold: 14208, cap: 20000, featured: true,
     target: { x: 71.9, y: 9.5 }, ar: 0.6667, ballSize: 10.3, ballImg: 'assets/balls/fb-pocket.png', ballW: 22.06,
   },
   {
     id: 'fb-fourthdown', sport: 'football', img: 'assets/img/football-2.jpg', landscape: true,
     title: 'Fourth Down', sub: 'The pass breakup that decided the bowl',
     prize: 'Super Bowl Suite for 4', prizeShort: 'SB SUITE ×4', prizeType: 'suite', prizeImg: 'assets/prizes/stadium-tunnel.jpg', fee: 3.0,
-    closesIn: 12 * 3600 + 18 * 60, sold: 6741, cap: 16000,
+    revealDow: 6, closesIn: 12 * 3600 + 18 * 60, sold: 6741, cap: 16000,
     target: { x: 44.4, y: 46.7 }, ar: 0.6667, ballSize: 9.6, ballImg: 'assets/balls/fb-fourthdown.png', ballW: 18.91,
   },
   {
     id: 'fb-looseball', sport: 'football', img: 'assets/img/football-3.jpg', landscape: true,
     title: 'Loose Ball', sub: 'Fumble! Every eye on the turf',
     prize: 'Rolex Day-Date Everose', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex-everose.jpg', fee: 2.5,
-    closesIn: 31 * 3600, sold: 2456, cap: 9000,
+    revealDow: 0, closesIn: 31 * 3600, sold: 2456, cap: 9000,
     target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 5.6, ballInPhoto: true,
   },
   // ---------------- BASKETBALL ----------------
@@ -89,28 +89,28 @@ const COMPETITIONS = [
     id: 'bb-topkey', sport: 'basketball', img: 'assets/img/basketball-1.jpg', landscape: true,
     title: 'Top of the Key', sub: 'Bird\'s-eye over the rim — swish or rattle?',
     prize: 'Courtside Season Tickets', prizeShort: 'COURTSIDE', prizeType: 'courtside', prizeImg: 'assets/prizes/courtside.jpg', fee: 3.0,
-    closesIn: 4 * 3600 + 3 * 60, sold: 7311, cap: 12000,
+    revealDow: 6, closesIn: 4 * 3600 + 3 * 60, sold: 7311, cap: 12000,
     target: { x: 46.5, y: 87.8 }, ar: 0.6667, ballSize: 9.4, ballImg: 'assets/balls/bb-topkey.png', ballW: 16.3,
   },
   {
     id: 'bb-rimrunner', sport: 'basketball', img: 'assets/img/basketball-2.jpg', landscape: true,
     title: 'Rim Runner', sub: 'Traffic in the paint, first half fire',
     prize: 'Framed Signed Kobe Jersey', prizeShort: 'KOBE 24', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-kobe.jpg', fee: 3.0,
-    closesIn: 8 * 3600 + 47 * 60, sold: 4102, cap: 10000,
+    revealDow: 6, closesIn: 8 * 3600 + 47 * 60, sold: 4102, cap: 10000,
     target: { x: 48.8, y: 10.0 }, ar: 0.6667, ballSize: 8.9, ballImg: 'assets/balls/bb-rimrunner.png', ballW: 18.83,
   },
   {
     id: 'bb-elevation', sport: 'basketball', img: 'assets/img/basketball-3.jpg', landscape: false,
     title: 'Elevation', sub: 'Two bigs, one ball, nine thousand eyes',
     prize: 'NBA Finals Trip for 2', prizeShort: 'FINALS ×2', prizeType: 'trip', prizeImg: 'assets/prizes/nba-finals.jpg', fee: 3.5,
-    closesIn: 22 * 3600, sold: 5820, cap: 13000, featured: true,
+    revealDow: 0, closesIn: 22 * 3600, sold: 5820, cap: 13000, featured: true,
     target: { x: 48.1, y: 7.0 }, ar: 0.6667, ballSize: 5.1, ballImg: 'assets/balls/bb-elevation.png', ballW: 10.94,
   },
   {
     id: 'bb-denied', sport: 'basketball', img: 'assets/img/basketball-4.jpg', landscape: false,
     title: 'Denied', sub: 'Double block at the summit',
     prize: 'Signed Deni Avdija Jersey', prizeShort: 'AVDIJA 8', prizeType: 'jersey', prizeImg: 'assets/prizes/jersey-avdija.jpg', fee: 2.5,
-    closesIn: 54 * 3600, sold: 1210, cap: 8000,
+    revealDow: 6, closesIn: 54 * 3600, sold: 1210, cap: 8000,
     target: { x: 59.0, y: 8.6 }, ar: 1.5, ballSize: 10.9, ballImg: 'assets/balls/bb-denied.png', ballW: 24.49,
   },
 ];
@@ -487,8 +487,24 @@ const API = (() => {
   const clone = o => JSON.parse(JSON.stringify(o));
   const compById = id => COMPETITIONS.find(c => c.id === id);
 
+  /* Every board is judged on the coming weekend: entries shut, the panel sits,
+     the prize is awarded. Dates are derived so the calendar is always live. */
+  function weekendReveal(c) {
+    const closes = new Date(state.epoch + c.closesIn * 1000);
+    const d = new Date(closes);
+    d.setHours(20, 0, 0, 0);
+    const want = c.revealDow === undefined ? 6 : c.revealDow;
+    for (let i = 0; i < 14; i++) {
+      if (d.getDay() === want && d > closes) break;
+      d.setDate(d.getDate() + 1);
+    }
+    return d.getTime();
+  }
+
   function compView(c) {
     const v = clone(c);
+    v.revealAt = weekendReveal(c);
+    v.awardAt = v.revealAt + 20 * 3600 * 1000;   // prizes go out the next day
     delete v.target;                       // clients never see the answer
     delete v.ballImg; delete v.ballW;      // real-ball reveal assets stay server-side until results
     v.closed = !!state.closed[c.id];
@@ -781,9 +797,83 @@ function compCard(c) {
         <span class="cc-fee">from <b>${money(PRICE_TIERS[0].each)}</b> / ticket</span>
         <span class="btn" style="padding:9px 18px;font-size:13px">${c.closed ? 'See results' : 'Play now'}</span>
       </div>
+      ${weekStrip(c)}
       ${c.myTickets ? `<div class="cc-mine">▸ You hold ${c.myTickets} ticket${c.myTickets > 1 ? 's' : ''} here</div>` : ''}
     </div>
   </a>`;
+}
+
+
+/* ============================================================
+   Weekly rhythm: entries run, the panel sits on the weekend,
+   prizes go out the day after. Drawn as a live seven-day strip.
+   ============================================================ */
+const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DOW_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function weekStrip(c, big = false) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const close = new Date(c.closesAt); close.setHours(0, 0, 0, 0);
+  const rev = new Date(c.revealAt); rev.setHours(0, 0, 0, 0);
+  const award = new Date(c.awardAt); award.setHours(0, 0, 0, 0);
+  // the week that contains the reveal, Monday first
+  const start = new Date(rev);
+  start.setDate(rev.getDate() - ((rev.getDay() + 6) % 7));
+  const cells = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = d.getTime();
+    const cls = [
+      k === today.getTime() ? 'now' : '',
+      k === close.getTime() ? 'close' : '',
+      k === rev.getTime() ? 'reveal' : '',
+      k === award.getTime() ? 'award' : '',
+      k < today.getTime() ? 'past' : '',
+      (d.getDay() === 0 || d.getDay() === 6) ? 'wknd' : '',
+    ].filter(Boolean).join(' ');
+    cells.push(`<i class="${cls}" style="--i:${i}"><b>${DOW[d.getDay()]}</b><u>${d.getDate()}</u></i>`);
+  }
+  const revName = DOW_FULL[new Date(c.revealAt).getDay()];
+  return `
+    <div class="wk ${big ? 'wk-big' : ''}">
+      <div class="wk-days">${cells.join('')}</div>
+      ${big ? `<div class="wk-legend">
+        <span><i class="d-close"></i>Entries close</span>
+        <span><i class="d-rev"></i>Judges rule · ${revName}</span>
+        <span><i class="d-aw"></i>Prize awarded</span>
+      </div>` : `<div class="wk-note">Judged <b>${revName}</b></div>`}
+    </div>`;
+}
+
+/* the home-page showpiece: a week that plays itself, then opens the vault */
+function revealCalendar(comps) {
+  const wk = comps.filter(c => !c.closed).slice(0, 5);
+  return `
+  <section class="section reveal-cal">
+    <div class="sec-head">
+      <h2>Every weekend, the judges rule</h2>
+      <span class="count">entries all week · verdict on the weekend</span>
+    </div>
+    <div class="rc-stage">
+      <div class="rc-week">
+        ${['MON','TUE','WED','THU','FRI','SAT','SUN'].map((d, i) => `
+          <div class="rc-day ${i > 4 ? 'is-wknd' : ''}" style="--i:${i}">
+            <span class="rc-dow">${d}</span>
+            <span class="rc-dot"></span>
+            <span class="rc-cap">${i < 5 ? 'entries open' : (i === 5 ? 'panel sits' : 'prizes out')}</span>
+          </div>`).join('')}
+        <div class="rc-sweep"></div>
+      </div>
+      <div class="rc-prizes">
+        ${wk.map((c, i) => `
+          <figure class="rc-prize" style="--i:${i}">
+            <img src="${c.prizeImg}" alt="" loading="lazy">
+            <figcaption><span>${SPORTS[c.sport].icon}</span> ${esc(c.prizeShort)}</figcaption>
+            <em>AWARDED</em>
+          </figure>`).join('')}
+      </div>
+    </div>
+  </section>`;
 }
 
 /* ---------- HOME ---------- */
@@ -850,6 +940,8 @@ async function viewHome(sportFilter) {
       <div class="how-card"><div class="num">04</div><h3>Closest wins</h3><p>Nearest crosshair takes the headline prize. Every entry earns precision points toward the weekly tournament pot.</p></div>
     </div>
   </section>
+
+  ${revealCalendar(comps)}
 
   <section class="section">
     <div class="sec-head">
@@ -969,6 +1061,11 @@ async function renderGate(c) {
           </div>
           <div class="cost-row"><span>Total</span> <span><span class="save" id="saveNote"></span> <b id="costTotal">${money(API.priceFor(5))}</b></span></div>
           <button class="btn big" id="buyBtn">Buy 5 tickets &amp; reveal the moment</button>
+        </div>
+
+        <div class="panel-card">
+          <h4>This week <span class="mono">weekend verdict</span></h4>
+          ${weekStrip(c, true)}
         </div>
 
         <div class="panel-card demo-card">
@@ -1535,7 +1632,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 25;
+const BUILD = 26;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

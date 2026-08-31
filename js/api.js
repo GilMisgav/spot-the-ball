@@ -88,8 +88,24 @@ const API = (() => {
   const clone = o => JSON.parse(JSON.stringify(o));
   const compById = id => COMPETITIONS.find(c => c.id === id);
 
+  /* Every board is judged on the coming weekend: entries shut, the panel sits,
+     the prize is awarded. Dates are derived so the calendar is always live. */
+  function weekendReveal(c) {
+    const closes = new Date(state.epoch + c.closesIn * 1000);
+    const d = new Date(closes);
+    d.setHours(20, 0, 0, 0);
+    const want = c.revealDow === undefined ? 6 : c.revealDow;
+    for (let i = 0; i < 14; i++) {
+      if (d.getDay() === want && d > closes) break;
+      d.setDate(d.getDate() + 1);
+    }
+    return d.getTime();
+  }
+
   function compView(c) {
     const v = clone(c);
+    v.revealAt = weekendReveal(c);
+    v.awardAt = v.revealAt + 20 * 3600 * 1000;   // prizes go out the next day
     delete v.target;                       // clients never see the answer
     delete v.ballImg; delete v.ballW;      // real-ball reveal assets stay server-side until results
     v.closed = !!state.closed[c.id];

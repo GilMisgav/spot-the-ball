@@ -149,9 +149,83 @@ function compCard(c) {
         <span class="cc-fee">from <b>${money(PRICE_TIERS[0].each)}</b> / ticket</span>
         <span class="btn" style="padding:9px 18px;font-size:13px">${c.closed ? 'See results' : 'Play now'}</span>
       </div>
+      ${weekStrip(c)}
       ${c.myTickets ? `<div class="cc-mine">▸ You hold ${c.myTickets} ticket${c.myTickets > 1 ? 's' : ''} here</div>` : ''}
     </div>
   </a>`;
+}
+
+
+/* ============================================================
+   Weekly rhythm: entries run, the panel sits on the weekend,
+   prizes go out the day after. Drawn as a live seven-day strip.
+   ============================================================ */
+const DOW = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DOW_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+function weekStrip(c, big = false) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const close = new Date(c.closesAt); close.setHours(0, 0, 0, 0);
+  const rev = new Date(c.revealAt); rev.setHours(0, 0, 0, 0);
+  const award = new Date(c.awardAt); award.setHours(0, 0, 0, 0);
+  // the week that contains the reveal, Monday first
+  const start = new Date(rev);
+  start.setDate(rev.getDate() - ((rev.getDay() + 6) % 7));
+  const cells = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = d.getTime();
+    const cls = [
+      k === today.getTime() ? 'now' : '',
+      k === close.getTime() ? 'close' : '',
+      k === rev.getTime() ? 'reveal' : '',
+      k === award.getTime() ? 'award' : '',
+      k < today.getTime() ? 'past' : '',
+      (d.getDay() === 0 || d.getDay() === 6) ? 'wknd' : '',
+    ].filter(Boolean).join(' ');
+    cells.push(`<i class="${cls}" style="--i:${i}"><b>${DOW[d.getDay()]}</b><u>${d.getDate()}</u></i>`);
+  }
+  const revName = DOW_FULL[new Date(c.revealAt).getDay()];
+  return `
+    <div class="wk ${big ? 'wk-big' : ''}">
+      <div class="wk-days">${cells.join('')}</div>
+      ${big ? `<div class="wk-legend">
+        <span><i class="d-close"></i>Entries close</span>
+        <span><i class="d-rev"></i>Judges rule · ${revName}</span>
+        <span><i class="d-aw"></i>Prize awarded</span>
+      </div>` : `<div class="wk-note">Judged <b>${revName}</b></div>`}
+    </div>`;
+}
+
+/* the home-page showpiece: a week that plays itself, then opens the vault */
+function revealCalendar(comps) {
+  const wk = comps.filter(c => !c.closed).slice(0, 5);
+  return `
+  <section class="section reveal-cal">
+    <div class="sec-head">
+      <h2>Every weekend, the judges rule</h2>
+      <span class="count">entries all week · verdict on the weekend</span>
+    </div>
+    <div class="rc-stage">
+      <div class="rc-week">
+        ${['MON','TUE','WED','THU','FRI','SAT','SUN'].map((d, i) => `
+          <div class="rc-day ${i > 4 ? 'is-wknd' : ''}" style="--i:${i}">
+            <span class="rc-dow">${d}</span>
+            <span class="rc-dot"></span>
+            <span class="rc-cap">${i < 5 ? 'entries open' : (i === 5 ? 'panel sits' : 'prizes out')}</span>
+          </div>`).join('')}
+        <div class="rc-sweep"></div>
+      </div>
+      <div class="rc-prizes">
+        ${wk.map((c, i) => `
+          <figure class="rc-prize" style="--i:${i}">
+            <img src="${c.prizeImg}" alt="" loading="lazy">
+            <figcaption><span>${SPORTS[c.sport].icon}</span> ${esc(c.prizeShort)}</figcaption>
+            <em>AWARDED</em>
+          </figure>`).join('')}
+      </div>
+    </div>
+  </section>`;
 }
 
 /* ---------- HOME ---------- */
@@ -218,6 +292,8 @@ async function viewHome(sportFilter) {
       <div class="how-card"><div class="num">04</div><h3>Closest wins</h3><p>Nearest crosshair takes the headline prize. Every entry earns precision points toward the weekly tournament pot.</p></div>
     </div>
   </section>
+
+  ${revealCalendar(comps)}
 
   <section class="section">
     <div class="sec-head">
@@ -337,6 +413,11 @@ async function renderGate(c) {
           </div>
           <div class="cost-row"><span>Total</span> <span><span class="save" id="saveNote"></span> <b id="costTotal">${money(API.priceFor(5))}</b></span></div>
           <button class="btn big" id="buyBtn">Buy 5 tickets &amp; reveal the moment</button>
+        </div>
+
+        <div class="panel-card">
+          <h4>This week <span class="mono">weekend verdict</span></h4>
+          ${weekStrip(c, true)}
         </div>
 
         <div class="panel-card demo-card">
@@ -903,7 +984,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 25;
+const BUILD = 26;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
