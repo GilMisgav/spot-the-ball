@@ -81,7 +81,7 @@ const COMPETITIONS = [
     title: 'Loose Ball', sub: 'Fumble! Every eye on the turf',
     prize: 'Rolex Day-Date Everose', prizeShort: 'ROLEX', prizeType: 'watch', prizeImg: 'assets/prizes/rolex-everose.jpg', fee: 2.5,
     revealDow: 0, closesIn: 31 * 3600, sold: 2456, cap: 9000,
-    target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 5.6, ballImg: 'assets/balls/fb-looseball.png', ballW: 12.08,
+    target: { x: 57.6, y: 86.7 }, ar: 0.6667, ballSize: 5.6, ballImg: 'assets/balls/fb-looseball.png', ballW: 7.03,
   },
   // ---------------- BASKETBALL ----------------
   {

@@ -511,8 +511,10 @@ async function viewPlay(id) {
   if (!c) { location.hash = '#/'; return; }
   if (c.closed) { location.hash = `#/results/${id}`; return; }
   const submitted = await API.myEntries(id);
-  // BOTB flow: the photo stays hidden until you hold tickets
-  if (c.myCredits > 0 || submitted.length > 0) return renderBoard(c, submitted);
+  // BOTB flow: photo hidden until you hold tickets · board while you still
+  // have crosshairs to place · a receipt once everything is locked in
+  if (c.myCredits > 0) return renderBoard(c, submitted);
+  if (submitted.length > 0) return renderSubmitted(c, submitted);
   return renderGate(c);
 }
 
@@ -641,6 +643,129 @@ async function renderGate(c) {
   });
 
   $('#finishBtn').addEventListener('click', async () => {
+    await API.closeCompetition(c.id);
+    location.hash = `#/results/${c.id}`;
+  });
+
+  liveCountdowns();
+}
+
+
+/* ----- step 3: entry is in, the panel sits at the weekend ----- */
+async function renderSubmitted(c, mine) {
+  const s = SPORTS[c.sport];
+  const revName = DOW_FULL[new Date(c.revealAt).getDay()];
+
+  app.innerHTML = `
+  <div class="play-wrap">
+    ${playTop(c)}
+
+    <div class="sub-hero">
+      <span class="sub-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>
+      <div class="sub-kicker">Entry received</div>
+      <h2>You're in the ${esc(c.title)} draw</h2>
+      <p><b>${mine.length}</b> crosshair${mine.length > 1 ? 's' : ''} locked · nothing more to do until the panel sits</p>
+    </div>
+
+    <div class="play-grid">
+      <div>
+        <div class="sub-clock">
+          <div class="sc-label">The judges rule <b>${revName}</b></div>
+          <div class="sc-time" data-deadline="${c.revealAt}">${fmtLeft(c.revealAt - Date.now())}</div>
+          <div class="sc-note">Three former professionals mark the ball independently. The average of their
+            verdicts becomes the official position, and the closest crosshair takes ${esc(c.prize)}.</div>
+          ${weekStrip(c, true)}
+        </div>
+
+        <div class="board-shell sub-board">
+          <div class="board" id="subBoard">
+            <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
+          </div>
+          <div class="board-hint">
+            <span><span class="k">LOCKED</span> — your ${mine.length} crosshair${mine.length > 1 ? 's' : ''} as submitted</span>
+            <span>${esc(c.sub)}</span>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel">
+        ${prizeCard(c, `
+          <div class="ct"><div class="n">${mine.length}</div><div class="l">Locked</div></div>
+          <div class="ct"><div class="n">${c.sold.toLocaleString()}</div><div class="l">In play</div></div>
+          <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>`)}
+
+        <div class="panel-card">
+          <h4>Your crosshairs <span class="mono">${mine.length} locked</span></h4>
+          <div class="picks">
+            ${mine.map((p, i) => `<div class="pick-row submitted">
+              <span class="idx">${i + 1}</span>
+              <span class="xy">x ${p.x.toFixed(1)} · y ${p.y.toFixed(1)}${c.sport === 'football' ? ` · ${Math.round(p.a || 0)}°/${Math.round(p.tilt || 0)}°` : ''}</span>
+              <span class="lock">✓ locked</span></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h4>Want more chances?</h4>
+          <p class="sub-more">Entries stay open until the board closes. Buy more crosshairs and place them on the same photo.</p>
+          <div class="qty-row" style="margin-top:0">
+            <div class="stepper"><button id="mMinus">−</button><b id="mVal">5</b><button id="mPlus">+</button></div>
+            <button class="btn ghost" id="moreBtn" style="width:auto;margin:0;padding:10px 16px">Add · ${money(API.priceFor(5))}</button>
+          </div>
+        </div>
+
+        <div class="panel-card demo-card">
+          <h4>Demo control</h4>
+          <p>Don't wait for the weekend — run this contest to the verdict and see the winners' experience now.</p>
+          <button class="btn big" id="runBtn">⏭ Run to the verdict</button>
+        </div>
+      </aside>
+    </div>
+  </div>`;
+
+  refreshWallet().then(me => $('#tileBal').textContent = money(me.balance).replace('.00', ''));
+
+  /* show the locked pins on the frozen board */
+  const sb = $('#subBoard'), img = $('img', sb);
+  const drawPins = () => {
+    $$('.pin', sb).forEach(p => p.remove());
+    const w = c.ballSize / 100 * sb.clientWidth;
+    sb.style.setProperty('--pin-w', w + 'px');
+    sb.style.setProperty('--pin-h', (c.sport === 'football' ? w * 0.606 : w) + 'px');
+    mine.forEach((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'pin ball-pin submitted';
+      el.style.left = p.x + '%'; el.style.top = p.y + '%';
+      el.style.setProperty('--rot', (p.a || 0) + 'deg');
+      const art = c.sport === 'football' ? buildFootball(p.tilt || 0) : BALL_CURSOR[c.sport];
+      el.innerHTML = `${art}<span class="n">${i + 1}</span>`;
+      sb.appendChild(el);
+    });
+  };
+  if (img.complete) drawPins(); else img.addEventListener('load', drawPins);
+  addEventListener('resize', drawPins);
+
+  let moreQty = 5;
+  const paintMore = () => {
+    $('#mVal').textContent = moreQty;
+    $('#moreBtn').textContent = `Add · ${money(API.priceFor(moreQty))}`;
+  };
+  $('#mMinus').addEventListener('click', () => { moreQty = Math.max(1, moreQty - 1); paintMore(); });
+  $('#mPlus').addEventListener('click', () => { moreQty = Math.min(25, moreQty + 1); paintMore(); });
+  $('#moreBtn').addEventListener('click', async () => {
+    try {
+      await API.buyTickets(c.id, moreQty);
+      await refreshWallet(true);
+      toast(`${moreQty} more crosshair${moreQty > 1 ? 's' : ''} in hand — place them on the photo`);
+      safeRoute();                       // credits > 0 → straight back to the board
+    } catch (err) {
+      if (String(err.message).includes('Insufficient')) {
+        toast('Not enough in your balance — top up to add more', true); openWallet();
+      } else toast(err.message, true);
+    }
+  });
+
+  $('#runBtn').addEventListener('click', async () => {
     await API.closeCompetition(c.id);
     location.hash = `#/results/${c.id}`;
   });
@@ -859,8 +984,9 @@ async function renderBoard(c, submitted) {
       submitted.push(...picks.map(p => ({ ...p })));
       picks = [];
       credits = res.credits;
-      renderPins();
       toast(`Entry locked — ${res.total} crosshair${res.total > 1 ? 's' : ''} on this board. Good luck! 🎯`);
+      if (credits === 0) { safeRoute(); return; }   // nothing left to place
+      renderPins();
     } catch (err) { toast(err.message, true); }
   });
 
@@ -1198,7 +1324,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 29;
+const BUILD = 31;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
