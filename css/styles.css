@@ -1232,24 +1232,24 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 }
 
 /* crypto */
-.cc-coins { display: flex; gap: 7px; }
-.cc-coin {
+.cy-coins { display: flex; gap: 7px; }
+.cy-coin {
   flex: 1; background: var(--ink-3); border: 1px solid var(--line); border-radius: 9px;
   padding: 9px 0; color: var(--text-dim); font-family: var(--mono); font-size: 12px;
   letter-spacing: .1em; transition: all .18s;
 }
-.cc-coin.sel { border-color: var(--gold); color: var(--gold-hi); background: rgba(242,178,75,.1); }
-.cc-body { display: flex; align-items: center; gap: 15px; margin-top: 14px; }
-.cc-qr {
+.cy-coin.sel { border-color: var(--gold); color: var(--gold-hi); background: rgba(242,178,75,.1); }
+.cy-body { display: flex; align-items: center; gap: 15px; margin-top: 14px; }
+.cy-qr {
   width: 92px; height: 92px; flex: none; padding: 7px; border-radius: 9px;
   background: #fff; color: #0a0d13;
 }
-.cc-qr svg { width: 100%; height: 100%; display: block; }
-.cc-addr { min-width: 0; }
-.cc-addr span { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
+.cy-qr svg { width: 100%; height: 100%; display: block; }
+.cy-addr { min-width: 0; }
+.cy-addr span { font-family: var(--mono); font-size: 9.5px; letter-spacing: .12em;
   text-transform: uppercase; color: var(--text-faint); }
-.cc-addr b { display: block; font-family: var(--mono); font-size: 16px; color: var(--gold-hi); margin: 3px 0 7px; }
-.cc-addr code {
+.cy-addr b { display: block; font-family: var(--mono); font-size: 16px; color: var(--gold-hi); margin: 3px 0 7px; }
+.cy-addr code {
   display: block; font-family: var(--mono); font-size: 9.5px; color: var(--text-dim);
   background: var(--ink-3); border: 1px solid var(--line); border-radius: 6px;
   padding: 6px 8px; overflow-wrap: anywhere;
@@ -1302,6 +1302,11 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
   background: radial-gradient(120% 120% at 70% 0%, rgba(242,178,75,.07), transparent 60%), var(--ink-2);
 }
 .hs-art .ha { width: 100%; height: auto; display: block; }
+.hs-art figcaption {
+  padding: 11px 16px 13px; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--text-faint); text-align: center;
+}
 .hs-num {
   font-family: var(--disp); font-weight: 800; font-size: 54px; line-height: 1;
   color: transparent; -webkit-text-stroke: 1.5px rgba(242,178,75,.55); display: block;

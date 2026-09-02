@@ -188,13 +188,13 @@ function methodPanel() {
     </div>`;
   return `
     <div class="co-panel co-crypto">
-      <div class="cc-coins">
-        ${['BTC','ETH','USDT'].map((c,i)=>`<button class="cc-coin ${i===0?'sel':''}" data-coin="${c}">${c}</button>`).join('')}
+      <div class="cy-coins">
+        ${['BTC','ETH','USDT'].map((c,i)=>`<button class="cy-coin ${i===0?'sel':''}" data-coin="${c}">${c}</button>`).join('')}
       </div>
-      <div class="cc-body">
-        <div class="cc-qr">${qrBlock()}</div>
-        <div class="cc-addr">
-          <span>Send exactly</span><b id="ccAmt">${(CO.cost * 0.0000147).toFixed(6)} BTC</b>
+      <div class="cy-body">
+        <div class="cy-qr">${qrBlock()}</div>
+        <div class="cy-addr">
+          <span>Send exactly</span><b id="cyAmt">${(CO.cost * 0.0000147).toFixed(6)} BTC</b>
           <code>bc1q · demo only · not a real wallet</code>
         </div>
       </div>
@@ -248,11 +248,11 @@ function renderCheckout() {
   $$('#coBody .co-method').forEach(b => b.addEventListener('click', () => {
     CO.method = b.dataset.m; renderCheckout();
   }));
-  $$('#coBody .cc-coin').forEach(b => b.addEventListener('click', () => {
-    $$('#coBody .cc-coin').forEach(x => x.classList.remove('sel'));
+  $$('#coBody .cy-coin').forEach(b => b.addEventListener('click', () => {
+    $$('#coBody .cy-coin').forEach(x => x.classList.remove('sel'));
     b.classList.add('sel');
     const per = { BTC: 0.0000147, ETH: 0.00037, USDT: 1 }[b.dataset.coin];
-    $('#ccAmt').textContent = (CO.cost * per).toFixed(b.dataset.coin === 'USDT' ? 2 : 6) + ' ' + b.dataset.coin;
+    $('#cyAmt').textContent = (CO.cost * per).toFixed(b.dataset.coin === 'USDT' ? 2 : 6) + ' ' + b.dataset.coin;
   }));
   $('#coPay').addEventListener('click', async () => {
     CO.stage = 'busy'; renderCheckout();
@@ -1110,17 +1110,17 @@ async function viewTournament() {
 /* ---------- HOW ---------- */
 async function viewHow() {
   const steps = [
-    { n: '01', art: 'moment', h: 'The moment',
+    { n: '01', art: 'moment', cap: 'Ball removed · nothing else touched', h: 'The moment',
       p: 'We license a professional sports photograph and lift the ball out of it. Eye-lines, body shape, the spray off the turf — everything else stays exactly as it happened.' },
-    { n: '02', art: 'tickets', h: 'Buy your tickets',
+    { n: '02', art: 'tickets', cap: '1 · 10 · 25 — more pins, lower price each', h: 'Buy your tickets',
       p: 'Tickets are bought blind: the photo stays hidden until you hold crosshairs to place. One to twenty-five per board, and the bigger the bundle the less each pin costs.' },
-    { n: '03', art: 'aim', h: 'Aim with the ball itself',
+    { n: '03', art: 'aim', cap: 'The ghost is the ball, at its true size', h: 'Aim with the ball itself',
       p: 'Your cursor is a ghost of the real ball, drawn at its exact size in that frame — so you judge the whole shape, not a dot. A football is no sphere: spin it and turn its nose toward you through a full 360°.' },
-    { n: '04', art: 'judges', h: 'The panel rules',
+    { n: '04', art: 'judges', cap: 'Three verdicts · one official position', h: 'The panel rules',
       p: 'When entries close, three former professionals mark the ball independently. The official position is the average of their three verdicts — the judges’ ball, not the original photo. That is what makes this skill and not a draw.' },
-    { n: '05', art: 'score', h: 'Closest wins',
+    { n: '05', art: 'score', cap: '1000 points at dead centre, falling away fast', h: 'Closest wins',
       p: 'Every pin scores 1000 · e⁻ᵈᐟ⁹, where d is its distance from the official position. The single closest crosshair takes the headline prize, and your best pin on each board banks points toward the weekly tournament.' },
-    { n: '06', art: 'pay', h: 'Wallet and payouts',
+    { n: '06', art: 'pay', cap: 'Pay how you like · cash out the same way', h: 'Wallet and payouts',
       p: 'Pay by Apple Pay, card, PayPal, Venmo or crypto — and cash out the same way. In this demo every balance is simulated; production plugs a real processor into the same API surface.' },
   ];
   app.innerHTML = `
@@ -1131,7 +1131,10 @@ async function viewHow() {
     <div class="how-steps">
       ${steps.map((s, i) => `
         <section class="how-step ${i % 2 ? 'flip' : ''}">
-          <figure class="hs-art">${HOW_ART[s.art]}</figure>
+          <figure class="hs-art">
+            ${HOW_ART[s.art]}
+            <figcaption>${s.cap}</figcaption>
+          </figure>
           <div class="hs-copy">
             <span class="hs-num">${s.n}</span>
             <h3>${s.h}</h3>
@@ -1188,7 +1191,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 27;
+const BUILD = 28;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 

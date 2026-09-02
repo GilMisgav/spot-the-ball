@@ -250,115 +250,130 @@ function buildFootball(tilt = 0) {
 BALL_CURSOR.football = buildFootball(0);
 
 /* ============================================================
-   How-to-play diagrams — one per step, drawn not photographed
-   so the mechanic reads clearly at any size.
+   How-to-play diagrams. No text inside the SVGs — a scaled
+   viewBox stretches type and letter-spacing unpredictably, so
+   every label lives in HTML beside the art instead.
    ============================================================ */
 const HOW_ART = {
   /* 01 — a frame of play with the ball lifted out */
-  moment: `<svg viewBox="0 0 300 180" class="ha">
-    <defs><linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1d2634"/><stop offset="1" stop-color="#0d1219"/></linearGradient></defs>
-    <rect x="10" y="12" width="280" height="156" rx="8" fill="url(#hg1)" stroke="var(--line-2)"/>
-    <path d="M10 128h280" stroke="rgba(61,220,132,.30)" stroke-width="16"/>
-    <g fill="rgba(255,255,255,.13)">
-      <ellipse cx="72" cy="126" rx="15" ry="5"/><ellipse cx="196" cy="126" rx="15" ry="5"/></g>
-    <g stroke="#8f9bad" stroke-width="3.4" fill="none" stroke-linecap="round">
-      <path d="M72 122V96m0 0-9-16m9 16 10-15M63 80l-8-11m17 11 12 5"/><circle cx="72" cy="70" r="8" fill="#8f9bad"/>
-      <path d="M196 122V94m0 0 10-16m-10 16-11-14m21 2 12-8m-23 8-13-6"/><circle cx="196" cy="68" r="8" fill="#8f9bad"/>
+  moment: `<svg viewBox="0 0 320 200" class="ha">
+    <defs>
+      <linearGradient id="hgSky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1b2432"/><stop offset="1" stop-color="#0c1118"/></linearGradient>
+      <linearGradient id="hgTurf" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#22503a"/><stop offset="1" stop-color="#163226"/></linearGradient>
+    </defs>
+    <rect width="320" height="200" fill="url(#hgSky)"/>
+    <g fill="rgba(255,255,255,.05)">
+      ${[18,52,90,132,176,214,252,292].map((x,i)=>`<circle cx="${x}" cy="${34+(i%3)*11}" r="${7-(i%2)}"/>`).join('')}
     </g>
-    <circle cx="139" cy="58" r="20" fill="none" stroke="var(--gold)" stroke-width="2.4" stroke-dasharray="5 5"/>
-    <g stroke="var(--gold-hi)" stroke-width="1.6" opacity=".85">
-      <path d="M139 30v-9M139 95v9M112 58h-9M175 58h9"/></g>
-    <text x="139" y="63" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="10" fill="var(--gold-hi)" letter-spacing="1">?</text>
-    <text x="150" y="158" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="8.5" fill="#626c7d" letter-spacing="2.4">BALL REMOVED · NOTHING ELSE TOUCHED</text>
+    <rect y="132" width="320" height="68" fill="url(#hgTurf)"/>
+    <g stroke="rgba(255,255,255,.13)" stroke-width="1.6">
+      <path d="M0 150h320"/><path d="M64 132v68M256 132v68"/></g>
+    <!-- striker, mid-volley -->
+    <g fill="#8b97a9">
+      <path d="M96 92c0-7 5-12 12-12s12 5 12 12-5 12-12 12-12-5-12-12z"/>
+      <path d="M104 104c9-2 17 3 19 12l5 22-9 3-6-19-6 26-8-2 5-42z"/>
+      <path d="M113 148l6 24 9 12-6 5-12-14-5-25z"/>
+      <path d="M108 150l-5 24-13 11 5 6 16-13 6-26z"/>
+      <path d="M120 116l24-9 3 8-25 10z"/>
+    </g>
+    <!-- defender, arms up -->
+    <g fill="#6e7a8c">
+      <path d="M206 96c0-7 5-12 11-12s11 5 11 12-5 11-11 11-11-4-11-11z"/>
+      <path d="M212 108c9-2 16 3 18 11l4 24-8 2-6-18-5 26-8-2 5-43z"/>
+      <path d="M220 150l4 24-9 13 6 5 13-16-4-26z"/>
+      <path d="M214 151l-6 24-14 12 5 6 17-14 6-27z"/>
+      <path d="M210 108l-20-16-6 6 21 18zM226 106l20-17 6 7-21 17z"/>
+    </g>
+    <ellipse cx="112" cy="196" rx="26" ry="5" fill="rgba(0,0,0,.3)"/>
+    <ellipse cx="216" cy="196" rx="24" ry="5" fill="rgba(0,0,0,.3)"/>
+    <!-- the hole where the ball was -->
+    <circle cx="163" cy="70" r="23" fill="rgba(10,13,19,.55)"/>
+    <circle cx="163" cy="70" r="23" fill="none" stroke="#f2b24b" stroke-width="2.4" stroke-dasharray="7 6"/>
+    <g stroke="#ffd98a" stroke-width="1.6" opacity=".8">
+      <path d="M163 36V22M163 104v14M129 70h-14M197 70h14"/></g>
   </svg>`,
 
   /* 02 — ticket bundles, cheaper by the handful */
-  tickets: `<svg viewBox="0 0 300 180" class="ha">
-    ${[0,1,2].map((i)=>`<g transform="translate(${28+i*72} ${52+i*10}) rotate(${-8+i*7})">
-      <rect x="0" y="0" width="112" height="62" rx="7" fill="#131a26" stroke="var(--gold)"
-            stroke-width="${i===2?2.6:1.6}" opacity="${0.5+i*0.25}"/>
-      <circle cx="0" cy="31" r="5" fill="#0a0d13"/><circle cx="112" cy="31" r="5" fill="#0a0d13"/>
-      <path d="M78 4v54" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="4 4" opacity=".7"/>
-      <text x="14" y="30" font-family="Big Shoulders Display,sans-serif" font-size="26"
-            font-weight="800" fill="var(--gold-hi)" opacity="${0.6+i*0.4}">${[1,10,25][i]}</text>
-      <text x="14" y="46" font-family="Spline Sans Mono,monospace" font-size="8"
-            fill="#9aa3b2" letter-spacing="1.4">${['$3.00','$2.10','$1.80'][i]}/EA</text>
-      <text x="95" y="36" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-            font-size="9" fill="var(--gold)">✕</text>
+  tickets: `<svg viewBox="0 0 320 200" class="ha">
+    ${[0,1,2].map(i=>`
+    <g transform="translate(${30+i*76} ${56+i*14}) rotate(${-9+i*8})" opacity="${0.55+i*0.22}">
+      <rect width="132" height="72" rx="9" fill="#141c28" stroke="#f2b24b" stroke-width="${i===2?2.6:1.6}"/>
+      <circle cx="0" cy="36" r="6" fill="#0a0d13"/><circle cx="132" cy="36" r="6" fill="#0a0d13"/>
+      <path d="M92 6v60" stroke="#f2b24b" stroke-width="1.3" stroke-dasharray="5 5" opacity=".65"/>
+      <g fill="rgba(242,178,75,.22)">
+        <rect x="16" y="16" width="${[16,30,42][i]}" height="9" rx="2"/>
+        <rect x="16" y="32" width="${[38,44,50][i]}" height="6" rx="2"/>
+        <rect x="16" y="45" width="28" height="6" rx="2"/></g>
+      <g stroke="#ffd98a" stroke-width="1.5" opacity=".9">
+        <circle cx="112" cy="36" r="9" fill="none"/>
+        <path d="M112 24v5M112 43v5M100 36h5M119 36h5"/></g>
     </g>`).join('')}
-    <text x="150" y="164" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="8.5" fill="#626c7d" letter-spacing="2.4">MORE PINS · LOWER PRICE EACH</text>
   </svg>`,
 
-  /* 03 — the ball-sized ghost, placed */
-  aim: `<svg viewBox="0 0 300 180" class="ha">
-    <rect x="10" y="12" width="280" height="156" rx="8" fill="#0f141d" stroke="var(--line-2)"/>
-    <path d="M10 132h280" stroke="rgba(61,220,132,.22)" stroke-width="14"/>
-    <g stroke="rgba(242,178,75,.35)" stroke-width="1"><path d="M150 12v156M10 84h280"/></g>
-    <circle cx="150" cy="84" r="30" fill="rgba(255,255,255,.10)" stroke="var(--gold-hi)" stroke-width="2.6"/>
-    <path d="M150 66l12.7 9.2-4.8 14.9h-15.8l-4.8-14.9z" fill="rgba(10,13,19,.45)"
-          stroke="var(--gold-hi)" stroke-width="1.3"/>
-    <g stroke="var(--gold-hi)" stroke-width="1.3" opacity=".7">
-      <path d="M150 66V54M162.7 75.2 174 68M158 90l7 12M142 90l-7 12M137.3 75.2 126 68"/></g>
-    <g stroke="#fff" stroke-width="1.4"><path d="M141 84h18M150 75v18"/></g>
-    <g fill="none" stroke="rgba(61,220,132,.75)" stroke-width="2">
-      <circle cx="78" cy="120" r="19"/><circle cx="222" cy="52" r="19"/></g>
-    <text x="150" y="158" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="8.5" fill="#626c7d" letter-spacing="2.4">THE GHOST IS THE BALL, AT TRUE SIZE</text>
+  /* 03 — the true-size ghost, and pins already placed */
+  aim: `<svg viewBox="0 0 320 200" class="ha">
+    <rect width="320" height="200" fill="#0e141d"/>
+    <rect y="140" width="320" height="60" fill="rgba(34,80,58,.5)"/>
+    <g stroke="rgba(255,255,255,.07)" stroke-width="1"><path d="M0 140h320"/></g>
+    <g stroke="rgba(242,178,75,.30)" stroke-width="1"><path d="M160 0v200M0 92h320"/></g>
+    <circle cx="160" cy="92" r="34" fill="rgba(255,255,255,.11)" stroke="#ffd98a" stroke-width="2.8"/>
+    <path d="M160 71l14.4 10.5-5.5 16.9h-17.8l-5.5-16.9z" fill="rgba(10,13,19,.42)"
+          stroke="#ffd98a" stroke-width="1.4"/>
+    <g stroke="#ffd98a" stroke-width="1.4" opacity=".7">
+      <path d="M160 71V57M174.4 81.5 187 73M168.9 98.4l8 14M151.1 98.4l-8 14M145.6 81.5 133 73"/></g>
+    <g stroke="#fff" stroke-width="1.5"><path d="M149 92h22M160 81v22"/></g>
+    <g fill="none" stroke="rgba(61,220,132,.7)" stroke-width="2.2">
+      <circle cx="72" cy="128" r="22"/><circle cx="246" cy="56" r="22"/></g>
+    <g fill="rgba(61,220,132,.7)"><circle cx="72" cy="128" r="2"/><circle cx="246" cy="56" r="2"/></g>
   </svg>`,
 
   /* 04 — three judges converge on one truth */
-  judges: `<svg viewBox="0 0 300 180" class="ha">
-    <circle cx="150" cy="88" r="62" fill="none" stroke="var(--line)" stroke-dasharray="3 6"/>
-    <circle cx="150" cy="88" r="34" fill="none" stroke="var(--line-2)" stroke-dasharray="3 6"/>
-    ${[[92,50],[214,62],[128,150]].map((p,i)=>`
+  judges: `<svg viewBox="0 0 320 200" class="ha">
+    <circle cx="160" cy="100" r="74" fill="none" stroke="rgba(255,255,255,.07)" stroke-dasharray="3 7"/>
+    <circle cx="160" cy="100" r="42" fill="none" stroke="rgba(255,255,255,.11)" stroke-dasharray="3 7"/>
+    ${[[86,52],[240,66],[122,170]].map((p,i)=>`
       <g>
-        <path d="M${p[0]} ${p[1]}L150 88" stroke="var(--gold)" stroke-width="1.2" stroke-dasharray="4 4" opacity=".6"/>
-        <circle cx="${p[0]}" cy="${p[1]}" r="13" fill="#131a26" stroke="var(--gold)" stroke-width="1.8"/>
-        <text x="${p[0]}" y="${p[1]+4}" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-              font-size="10" fill="var(--gold-hi)">J${i+1}</text>
+        <path d="M${p[0]} ${p[1]}L160 100" stroke="#f2b24b" stroke-width="1.3" stroke-dasharray="5 5" opacity=".55"/>
+        <circle cx="${p[0]}" cy="${p[1]}" r="17" fill="#141c28" stroke="#f2b24b" stroke-width="1.9"/>
+        <g fill="#ffd98a" transform="translate(${p[0]-8} ${p[1]-9}) scale(.7)">
+          <circle cx="11" cy="7" r="6"/><path d="M11 16c7 0 12 5 12 12H-1c0-7 5-12 12-12z"/></g>
+        <circle cx="${p[0]}" cy="${p[1]}" r="3" fill="#f2b24b" opacity=".0"/>
       </g>`).join('')}
-    <circle cx="150" cy="88" r="13" fill="var(--gold)"/>
-    <circle cx="150" cy="88" r="4" fill="#0a0d13"/>
-    <text x="150" y="26" text-anchor="middle" font-family="Big Shoulders Display,sans-serif"
-          font-size="17" font-weight="800" fill="#eef1f6" letter-spacing="1">THE PANEL DECIDES</text>
-    <text x="150" y="168" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="8.5" fill="#626c7d" letter-spacing="2.4">THREE VERDICTS · ONE OFFICIAL POSITION</text>
+    <circle cx="160" cy="100" r="17" fill="#f2b24b"/>
+    <circle cx="160" cy="100" r="5.5" fill="#0a0d13"/>
+    <g stroke="#ffd98a" stroke-width="1.8"><path d="M160 66V54M160 146v12M114 100h-12M218 100h12"/></g>
   </svg>`,
 
   /* 05 — the scoring curve */
-  score: `<svg viewBox="0 0 300 180" class="ha">
-    <defs><linearGradient id="hg2" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="rgba(242,178,75,.42)"/><stop offset="1" stop-color="rgba(242,178,75,0)"/></linearGradient></defs>
-    <g stroke="var(--line)" stroke-width="1">
-      ${[0,1,2,3].map(i=>`<path d="M40 ${34+i*30}h230"/>`).join('')}</g>
-    <path d="M40 34C86 34 96 118 150 130s70 6 120 8v16H40z" fill="url(#hg2)"/>
-    <path d="M40 34C86 34 96 118 150 130s70 6 120 8" fill="none" stroke="var(--gold)" stroke-width="2.6"/>
-    <g stroke="var(--text-faint)" stroke-width="1.4"><path d="M40 154h230M40 26v128"/></g>
-    <g fill="var(--gold-hi)"><circle cx="40" cy="34" r="4"/><circle cx="112" cy="96" r="4"/><circle cx="214" cy="136" r="4"/></g>
-    <g font-family="Spline Sans Mono,monospace" font-size="8.5" fill="#9aa3b2">
-      <text x="47" y="30">1000 pts</text><text x="119" y="92">420</text><text x="221" y="132">60</text>
-      <text x="36" y="168">0</text><text x="150" y="168" text-anchor="middle">distance from the judges' ball →</text></g>
-    <text x="150" y="18" text-anchor="middle" font-family="Big Shoulders Display,sans-serif"
-          font-size="15" font-weight="800" fill="#eef1f6" letter-spacing="1">1000 · e‾ᵈ⁄⁹</text>
+  score: `<svg viewBox="0 0 320 200" class="ha">
+    <defs><linearGradient id="hgFill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="rgba(242,178,75,.40)"/><stop offset="1" stop-color="rgba(242,178,75,0)"/></linearGradient></defs>
+    <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+      ${[0,1,2,3,4].map(i=>`<path d="M44 ${34+i*30}h250"/>`).join('')}
+      ${[0,1,2,3,4,5].map(i=>`<path d="M${44+i*50} 34v120"/>`).join('')}</g>
+    <path d="M44 34C96 34 106 122 160 134s76 4 134 6v14H44z" fill="url(#hgFill)"/>
+    <path d="M44 34C96 34 106 122 160 134s76 4 134 6" fill="none" stroke="#f2b24b" stroke-width="3"/>
+    <g stroke="#626c7d" stroke-width="1.5"><path d="M44 154h250M44 26v128"/></g>
+    <g fill="#ffd98a" stroke="#0a0d13" stroke-width="1.5">
+      <circle cx="44" cy="34" r="5"/><circle cx="120" cy="100" r="5"/><circle cx="230" cy="138" r="5"/></g>
   </svg>`,
 
-  /* 06 — payment methods */
-  pay: `<svg viewBox="0 0 300 180" class="ha">
-    <rect x="24" y="30" width="252" height="120" rx="12" fill="#111823" stroke="var(--line-2)"/>
-    ${[0,1,2,3,4].map(i=>`<rect x="${40+i*46}" y="${52}" width="36" height="30" rx="6"
-        fill="#0a0d13" stroke="var(--gold)" stroke-width="1.4" opacity="${0.45+i*0.11}"/>`).join('')}
-    <g font-family="Spline Sans Mono,monospace" font-size="7" fill="var(--gold-hi)" text-anchor="middle">
-      <text x="58" y="71"></text><text x="104" y="71">CARD</text><text x="150" y="71">PP</text>
-      <text x="196" y="71">VENMO</text><text x="242" y="71">₿</text></g>
-    <rect x="40" y="98" width="220" height="1" fill="var(--line)"/>
-    <g font-family="Spline Sans Mono,monospace" font-size="9" fill="#9aa3b2">
-      <text x="40" y="118">Entry</text><text x="260" y="118" text-anchor="end" fill="#eef1f6">$21.00</text>
-      <text x="40" y="136">Withdrawals</text><text x="260" y="136" text-anchor="end" fill="var(--ok)">4 days</text></g>
-    <text x="150" y="168" text-anchor="middle" font-family="Spline Sans Mono,monospace"
-          font-size="8.5" fill="#626c7d" letter-spacing="2.4">PAY HOW YOU LIKE · CASH OUT THE SAME WAY</text>
+  /* 06 — payment methods and payouts */
+  pay: `<svg viewBox="0 0 320 200" class="ha">
+    <rect x="26" y="28" width="268" height="144" rx="14" fill="#111823" stroke="rgba(255,255,255,.12)"/>
+    ${[0,1,2,3,4].map(i=>`
+      <g transform="translate(${44+i*46} 50)" opacity="${0.5+i*0.1}">
+        <rect width="38" height="30" rx="7" fill="#0a0d13" stroke="#f2b24b" stroke-width="1.5"/>
+        <rect x="7" y="9" width="24" height="3.4" rx="1.7" fill="rgba(242,178,75,.75)"/>
+        <rect x="7" y="17" width="15" height="3.4" rx="1.7" fill="rgba(242,178,75,.4)"/>
+      </g>`).join('')}
+    <path d="M44 100h232" stroke="rgba(255,255,255,.08)"/>
+    <g fill="rgba(255,255,255,.14)">
+      <rect x="44" y="112" width="58" height="7" rx="3.5"/>
+      <rect x="44" y="132" width="86" height="7" rx="3.5"/></g>
+    <g fill="rgba(242,178,75,.55)"><rect x="216" y="112" width="60" height="7" rx="3.5"/></g>
+    <g fill="rgba(61,220,132,.6)"><rect x="232" y="132" width="44" height="7" rx="3.5"/></g>
   </svg>`,
 };
