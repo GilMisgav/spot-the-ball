@@ -877,6 +877,19 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 @keyframes haloIn { from { opacity: 0; transform: scale(2.2) } to { opacity: 1; transform: scale(1) } }
 @keyframes haloBeat { 50% { box-shadow: 0 0 0 2px rgba(255,255,255,.9), 0 0 34px 10px rgba(242,178,75,.55) } }
 
+/* the ball's own silhouette, at true size, over the restored ball */
+.ball-shape {
+  position: absolute; z-index: 12; pointer-events: none;
+  width: var(--pin-w, 60px); height: var(--pin-h, 60px);
+  margin: calc(var(--pin-h, 60px) / -2) 0 0 calc(var(--pin-w, 60px) / -2);
+  --bc: #ffffff;
+  filter: drop-shadow(0 0 4px rgba(0,0,0,.95)) drop-shadow(0 0 12px rgba(242,178,75,.7));
+  animation: shapeIn .6s cubic-bezier(.2,1.2,.4,1) 1.05s both;
+}
+.ball-shape svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.ball-shape svg ellipse[fill^="url"], .ball-shape svg circle[fill^="rgba"] { fill: none; }
+@keyframes shapeIn { from { opacity: 0; transform: scale(1.9) } to { opacity: 1; transform: none } }
+
 .ball-tag {
   position: absolute; z-index: 13; pointer-events: none;
   animation: tagIn .5s ease 1.3s both;

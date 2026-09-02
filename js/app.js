@@ -68,15 +68,21 @@ $('#coModal').addEventListener('click', e => {
 });
 $('#walletChip').addEventListener('click', openWallet);
 $('#mobileWallet')?.addEventListener('click', openWallet);
-$('#walletModal').addEventListener('click', async e => {
+$('#walletModal').addEventListener('click', e => {
   if (e.target.dataset.closeWallet !== undefined || e.target === $('#walletModal')) $('#walletModal').hidden = true;
   const amt = e.target.dataset.topup;
   if (amt) {
-    await API.topUp(+amt);
-    const me = await refreshWallet(true);
-    $('#wmBalance').textContent = money(me.balance);
-    toast(`Added ${money(+amt)} demo funds`);
-    openWallet();
+    // money enters the account here — this is where the payment sheet belongs
+    $('#walletModal').hidden = true;
+    openCheckout({
+      amount: +amt,
+      onDone: async () => {
+        await API.topUp(+amt);
+        const me = await refreshWallet(true);
+        toast(`${money(+amt)} added to your balance`);
+        openWallet();
+      },
+    });
   }
 });
 
@@ -133,7 +139,7 @@ const payMethod = id => PAY_METHODS.find(m => m.id === id);
 let CO = null;
 
 function openCheckout(o) {
-  CO = { ...o, method: 'apple', stage: 'pick' };
+  CO = { ...o, cost: o.amount, method: 'apple', stage: 'pick' };
   renderCheckout();
   $('#coModal').hidden = false;
 }
@@ -209,14 +215,14 @@ function renderCheckout() {
       <div class="co-done">
         <span class="co-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
           stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>
-        <h3>Payment taken</h3>
-        <p>${CO.n} crosshair${CO.n > 1 ? 's' : ''} added to <b>${esc(CO.title)}</b></p>
+        <h3>Balance topped up</h3>
+        <p><b>${money(CO.cost)}</b> is in your wallet — every entry now comes straight out of it.</p>
         <div class="co-receipt">
           <div><span>Paid</span><b>${money(CO.cost)}</b></div>
           <div><span>Method</span><b>${payMethod(CO.method).label}</b></div>
           <div><span>Reference</span><b>STB-${Math.random().toString(36).slice(2,8).toUpperCase()}</b></div>
         </div>
-        <button class="btn big" id="coFinish">Reveal the moment →</button>
+        <button class="btn big" id="coFinish">Back to the wallet →</button>
       </div>`;
     $('#coFinish').addEventListener('click', () => { const f = CO.onDone; closeCheckout(); f(); });
     return;
@@ -229,9 +235,9 @@ function renderCheckout() {
   }
   body.innerHTML = `
     <div class="co-summary">
-      <div class="co-line"><span>${CO.n} × ticket</span><b>${money(CO.cost)}</b></div>
-      <div class="co-line sm"><span>${esc(CO.title)}</span><span>${money(CO.cost / CO.n)} each</span></div>
-      <div class="co-total"><span>Total</span><b>${money(CO.cost)}</b></div>
+      <div class="co-line"><span>Top up your balance</span><b>${money(CO.cost)}</b></div>
+      <div class="co-line sm"><span>Spot the Ball wallet</span><span>buys ${Math.floor(CO.cost / 1.8)} tickets at the best rate</span></div>
+      <div class="co-total"><span>To pay</span><b>${money(CO.cost)}</b></div>
     </div>
     <div class="co-methods">
       ${PAY_METHODS.map(m => `
@@ -620,19 +626,18 @@ async function renderGate(c) {
   $('#qMinus').addEventListener('click', () => { qty = Math.max(1, qty - 1); paint(); });
   $('#qPlus').addEventListener('click', () => { qty = Math.min(25, qty + 1); paint(); });
 
-  $('#buyBtn').addEventListener('click', () => {
-    openCheckout({
-      n: qty, cost: API.priceFor(qty), compId: c.id, title: c.title,
-      onDone: async () => {
-        // the simulated payment funds the demo wallet, then buys the tickets
-        const cost = API.priceFor(qty);
-        if (cost > (await API.me()).balance) await API.topUp(cost);
-        const res = await API.buyTickets(c.id, qty);
-        await refreshWallet(true);
-        toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
-        safeRoute();
-      },
-    });
+  $('#buyBtn').addEventListener('click', async () => {
+    try {
+      const res = await API.buyTickets(c.id, qty);
+      await refreshWallet(true);
+      toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
+      safeRoute();
+    } catch (err) {
+      if (String(err.message).includes('Insufficient')) {
+        toast('Not enough in your balance — top up to enter', true);
+        openWallet();
+      } else toast(err.message, true);
+    }
   });
 
   $('#finishBtn').addEventListener('click', async () => {
@@ -865,20 +870,20 @@ async function renderBoard(c, submitted) {
   }
   $('#aMinus').addEventListener('click', () => { addQty = Math.max(1, addQty - 1); paintAdd(); });
   $('#aPlus').addEventListener('click', () => { addQty = Math.min(25, addQty + 1); paintAdd(); });
-  $('#addBtn').addEventListener('click', () => {
-    openCheckout({
-      n: addQty, cost: API.priceFor(addQty), compId: c.id, title: c.title,
-      onDone: async () => {
-        try {
-          const res = await API.buyTickets(c.id, addQty);
-          credits = res.credits;
-          const me = await refreshWallet(true);
-          $('#tileBal').textContent = money(me.balance).replace('.00', '');
-          renderPins();
-          toast(`+${addQty} ticket${addQty > 1 ? 's' : ''} added to your hand`);
-        } catch (e) { toast(e.message, true); }
-      },
-    });
+  $('#addBtn').addEventListener('click', async () => {
+    try {
+      const res = await API.buyTickets(c.id, addQty);
+      credits = res.credits;
+      const me = await refreshWallet(true);
+      $('#tileBal').textContent = money(me.balance).replace('.00', '');
+      renderPins();
+      toast(`+${addQty} ticket${addQty > 1 ? 's' : ''} added to your hand`);
+    } catch (err) {
+      if (String(err.message).includes('Insufficient')) {
+        toast('Not enough in your balance — top up to add more', true);
+        openWallet();
+      } else toast(err.message, true);
+    }
   });
 
   $('#finishBtn').addEventListener('click', async () => {
@@ -956,6 +961,8 @@ async function viewResults(id) {
             <div class="reveal-spot" style="--tx:${target.x}%;--ty:${target.y}%"></div>
             ${ballImg ? `<img class="ball-real" src="${ballImg}" alt="" style="left:${target.x}%;top:${target.y}%;width:${ballW}%">` : ''}
             <div class="ball-halo" style="left:${target.x}%;top:${target.y}%"></div>
+            <div class="ball-shape" style="left:${target.x}%;top:${target.y}%">${
+              c.sport === 'football' ? buildFootball(0) : BALL_CURSOR[c.sport]}</div>
             <div class="ball-tag" style="left:${target.x}%;top:${target.y}%"><i></i><span>THE BALL</span></div>
             <div class="ballmark" style="left:${target.x}%;top:${target.y}%">
               <span class="ring r2"></span><span class="ring r3"></span>
@@ -1191,7 +1198,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 28;
+const BUILD = 29;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
