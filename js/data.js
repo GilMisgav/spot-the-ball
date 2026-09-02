@@ -136,13 +136,32 @@ const TOURNAMENT = {
   endsIn: 3 * 24 * 3600 + 11 * 3600,
 };
 
-/* Past winners wall. Illustrative only — fictional names, stock portraits,
-   labelled as such in the UI. Real winners replace this from the server. */
+/* Past winners wall. Illustrative only — fictional names, stock portraits and
+   stock prize photography, labelled as such in the UI. Real winners replace
+   this array from the server. */
 const PAST_WINNERS = [
-  { name: 'Ally M.',  from: 'Manchester', prize: 'Porsche 911 Carrera',    week: 'W29', sport: 'soccer',     dist: '0.41', photo: 'assets/winners/w2.jpg' },
-  { name: 'Dev P.',   from: 'Austin',     prize: '$75,000 Cash',           week: 'W30', sport: 'football',   dist: '0.58', photo: 'assets/winners/w1.jpg' },
-  { name: 'Sofia R.', from: 'Madrid',     prize: 'World Cup Final Trip',   week: 'W31', sport: 'soccer',     dist: '0.33', photo: 'assets/winners/w4.jpg' },
-  { name: 'Ken W.',   from: 'Toronto',    prize: 'Courtside Tickets + $10K', week: 'W32', sport: 'basketball', dist: '0.62', photo: 'assets/winners/w5.jpg' },
-  { name: 'Lena T.',  from: 'Berlin',     prize: 'Rolex Submariner',       week: 'W28', sport: 'basketball', dist: '0.47', photo: 'assets/winners/w6.jpg' },
-  { name: 'Marco B.', from: 'Milan',      prize: 'Super Bowl Suite ×4',    week: 'W27', sport: 'football',   dist: '0.71', photo: 'assets/winners/w3.jpg' },
+  { name: 'Ally M.',  from: 'Manchester', week: 'W29', sport: 'soccer', dist: '0.41',
+    prize: 'Porsche Panamera Turbo', prizeSub: 'Collected from the factory in Stuttgart',
+    photo: 'assets/winners/w2.jpg', prizeImg: 'assets/prizes/porsche.jpg',
+    quote: 'I zoomed in on the keeper\u2019s hands and just knew. Forty-one thousandths off.' },
+  { name: 'Dev P.',   from: 'Austin', week: 'W30', sport: 'football', dist: '0.58',
+    prize: '$75,000 Cash', prizeSub: 'Paid out in four days',
+    photo: 'assets/winners/w1.jpg', prizeImg: 'assets/prizes/cash-100s.jpg',
+    quote: 'Nine dollars of tickets. I read the spiral, not the crowd.' },
+  { name: 'Sofia R.', from: 'Madrid', week: 'W31', sport: 'soccer', dist: '0.33',
+    prize: 'World Cup Final \u00b7 Trip for 2', prizeSub: 'Two seats, halfway line',
+    photo: 'assets/winners/w4.jpg', prizeImg: 'assets/prizes/worldcup-trophy.jpg',
+    quote: 'My father and I have watched every final on television. Not this one.' },
+  { name: 'Ken W.',   from: 'Toronto', week: 'W32', sport: 'basketball', dist: '0.62',
+    prize: 'Courtside Season Tickets', prizeSub: 'Row 1, all 41 home games',
+    photo: 'assets/winners/w5.jpg', prizeImg: 'assets/prizes/courtside.jpg',
+    quote: 'Everyone put it in the rim. The ball was still on the arc.' },
+  { name: 'Lena T.',  from: 'Berlin', week: 'W28', sport: 'basketball', dist: '0.47',
+    prize: 'Rolex Day-Date Platinum', prizeSub: 'Ice-blue dial, engraved',
+    photo: 'assets/winners/w6.jpg', prizeImg: 'assets/prizes/rolex.jpg',
+    quote: 'Twenty-five crosshairs. One of them was right.' },
+  { name: 'Marco B.', from: 'Milan', week: 'W27', sport: 'football', dist: '0.71',
+    prize: 'Super Bowl Suite \u00d7 4', prizeSub: 'Flights and hotel included',
+    photo: 'assets/winners/w3.jpg', prizeImg: 'assets/prizes/stadium-tunnel.jpg',
+    quote: 'I have never been to America. Now I am going with my brothers.' },
 ];

@@ -63,6 +63,9 @@ async function openWallet() {
     <span class="amt ${t.amt > 0 ? 'pos' : ''}">${t.amt > 0 ? '+' : '−'}${money(Math.abs(t.amt))}</span></li>`).join('');
   $('#walletModal').hidden = false;
 }
+$('#coModal').addEventListener('click', e => {
+  if (e.target.dataset.closeCo !== undefined || e.target === $('#coModal')) closeCheckout();
+});
 $('#walletChip').addEventListener('click', openWallet);
 $('#mobileWallet')?.addEventListener('click', openWallet);
 $('#walletModal').addEventListener('click', async e => {
@@ -105,6 +108,157 @@ function confetti() {
     if (++frame < 260) requestAnimationFrame(draw);
     else ctx.clearRect(0, 0, cv.width, cv.height);
   })();
+}
+
+
+/* ============================================================
+   Checkout — a simulation of the payment step, end to end.
+   Nothing leaves the browser. The card panel is pre-filled with a
+   test number and is read-only, so no real details are ever typed.
+   ============================================================ */
+const PAY_METHODS = [
+  { id: 'apple',  label: 'Apple Pay', tag: 'One touch',
+    art: `<svg viewBox="0 0 44 24" fill="currentColor"><path d="M10.6 6.2c.6-.7 1-1.7.9-2.7-.9.04-2 .6-2.7 1.4-.6.7-1 1.7-.9 2.6 1 .08 2-.5 2.7-1.3zM13.4 17.6c-.7 1-1.5 2-2.7 2-1.1 0-1.5-.7-2.8-.7-1.3 0-1.7.7-2.8.7-1.2 0-2-1.1-2.8-2.2C.9 15.6.2 12.4 1.4 10.2c.7-1.2 1.9-2 3.2-2 1.2 0 2 .7 2.8.7.8 0 1.7-.8 3.1-.7 1 .04 2.2.6 2.9 1.7-1.9 1.2-1.7 4.1.2 5.1-.2.6-.5 1.2-.9 1.9z"/><text x="17.5" y="17.5" font-family="-apple-system,Helvetica,sans-serif" font-size="12" font-weight="600">Pay</text></svg>` },
+  { id: 'card',   label: 'Credit card', tag: 'Visa · Mastercard · Amex',
+    art: `<svg viewBox="0 0 44 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="38" height="16" rx="3"/><path d="M3 9.5h38"/><path d="M8 15.5h8"/><path d="M31 15.5h6"/></svg>` },
+  { id: 'paypal', label: 'PayPal', tag: 'Pay from your balance',
+    art: `<svg viewBox="0 0 44 24" fill="currentColor"><path d="M9 3.5h7.6c3.7 0 5.6 1.9 5 5.1-.5 3.3-3.1 5.1-6.6 5.1h-2.4L11.9 20H7.4L9 3.5zm3.3 6.6h1.8c1.4 0 2.5-.6 2.7-2 .2-1.2-.5-1.7-1.9-1.7h-1.9l-.7 3.7z"/><path d="M21.6 6.6h7.6c3.7 0 5.6 1.9 5 5.1-.5 3.3-3.1 5.1-6.6 5.1h-2.4L24.5 23H20l1.6-16.4zm3.3 6.6h1.8c1.4 0 2.5-.6 2.7-2 .2-1.2-.5-1.7-1.9-1.7H25.6l-.7 3.7z" opacity=".5"/></svg>` },
+  { id: 'venmo',  label: 'Venmo', tag: 'Split with friends',
+    art: `<svg viewBox="0 0 44 24" fill="currentColor"><path d="M11.9 4.2c.6 1.1.9 2.3.9 3.8 0 4.7-4 10.8-7.2 15H1.2L5.2 4.2h4.7L7.9 15.9c1.6-2.7 3.6-6.8 3.6-9.6 0-1.5-.3-2.5-.6-3.3l1 1.2z"/><text x="15" y="17.5" font-family="Helvetica,sans-serif" font-size="11" font-weight="700">venmo</text></svg>` },
+  { id: 'crypto', label: 'Crypto', tag: 'BTC · ETH · USDT',
+    art: `<svg viewBox="0 0 44 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.4"/><path d="M9.2 7.6h4.4a2.2 2.2 0 0 1 0 4.4H9.2m0 0h4.8a2.2 2.2 0 0 1 0 4.4H9.2m0-8.8v8.8M11 5.6v2M11 16.4v2"/><path d="M26 12h14M34.5 6.5 40 12l-5.5 5.5" opacity=".45"/></svg>` },
+];
+const payMethod = id => PAY_METHODS.find(m => m.id === id);
+
+let CO = null;
+
+function openCheckout(o) {
+  CO = { ...o, method: 'apple', stage: 'pick' };
+  renderCheckout();
+  $('#coModal').hidden = false;
+}
+function closeCheckout() { $('#coModal').hidden = true; CO = null; }
+
+/* decorative QR-looking block — deterministic, not a scannable code */
+function qrBlock() {
+  let cells = '', h = 99991;
+  for (let y = 0; y < 13; y++) for (let x = 0; x < 13; x++) {
+    h = (h * 1103515245 + 12345) & 0x7fffffff;
+    const corner = (x < 4 && y < 4) || (x > 8 && y < 4) || (x < 4 && y > 8);
+    const on = corner ? ((x + y) % 3 !== 1) : (h % 100 > 52);
+    if (on) cells += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  }
+  return `<svg viewBox="0 0 13 13" fill="currentColor" shape-rendering="crispEdges">${cells}</svg>`;
+}
+
+function methodPanel() {
+  const m = CO.method;
+  if (m === 'apple') return `
+    <div class="co-panel co-apple">
+      <div class="ap-sheet">
+        <div class="ap-top"><span class="ap-mark">${payMethod('apple').art}</span><b>Spot the Ball</b></div>
+        <div class="ap-row"><span>Card</span><b>•••• 4242 · Visa</b></div>
+        <div class="ap-row"><span>Total</span><b>${money(CO.cost)}</b></div>
+        <div class="ap-confirm"><span class="ap-ring"></span>Confirm with Touch ID</div>
+      </div>
+    </div>`;
+  if (m === 'card') return `
+    <div class="co-panel">
+      <div class="co-fields">
+        <label>Card number<input value="4242 4242 4242 4242" readonly></label>
+        <div class="co-two">
+          <label>Expiry<input value="12 / 29" readonly></label>
+          <label>CVC<input value="•••" readonly></label>
+        </div>
+        <label>Name on card<input value="GIL MISGAV" readonly></label>
+      </div>
+      <p class="co-note">A test card, filled in for you — this demo never asks for real details.</p>
+    </div>`;
+  if (m === 'paypal') return `
+    <div class="co-panel co-redirect">
+      <span class="co-brand pp">${payMethod('paypal').art}</span>
+      <b>gil@artestudio.io</b><span>PayPal balance · $1,240.00</span>
+      <p class="co-note">In production this hands off to PayPal and returns with a token.</p>
+    </div>`;
+  if (m === 'venmo') return `
+    <div class="co-panel co-redirect">
+      <span class="co-brand vn">${payMethod('venmo').art}</span>
+      <b>@gil-misgav</b><span>Venmo balance · $310.50</span>
+      <label class="co-check"><input type="checkbox" checked disabled> Share this entry on my feed</label>
+    </div>`;
+  return `
+    <div class="co-panel co-crypto">
+      <div class="cc-coins">
+        ${['BTC','ETH','USDT'].map((c,i)=>`<button class="cc-coin ${i===0?'sel':''}" data-coin="${c}">${c}</button>`).join('')}
+      </div>
+      <div class="cc-body">
+        <div class="cc-qr">${qrBlock()}</div>
+        <div class="cc-addr">
+          <span>Send exactly</span><b id="ccAmt">${(CO.cost * 0.0000147).toFixed(6)} BTC</b>
+          <code>bc1q · demo only · not a real wallet</code>
+        </div>
+      </div>
+      <p class="co-note">Demo address — nothing is broadcast to any chain.</p>
+    </div>`;
+}
+
+function renderCheckout() {
+  const body = $('#coBody');
+  if (CO.stage === 'done') {
+    body.innerHTML = `
+      <div class="co-done">
+        <span class="co-tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2.6" stroke-linecap="round"><path d="M4 12.5l5.2 5.2L20 7"/></svg></span>
+        <h3>Payment taken</h3>
+        <p>${CO.n} crosshair${CO.n > 1 ? 's' : ''} added to <b>${esc(CO.title)}</b></p>
+        <div class="co-receipt">
+          <div><span>Paid</span><b>${money(CO.cost)}</b></div>
+          <div><span>Method</span><b>${payMethod(CO.method).label}</b></div>
+          <div><span>Reference</span><b>STB-${Math.random().toString(36).slice(2,8).toUpperCase()}</b></div>
+        </div>
+        <button class="btn big" id="coFinish">Reveal the moment →</button>
+      </div>`;
+    $('#coFinish').addEventListener('click', () => { const f = CO.onDone; closeCheckout(); f(); });
+    return;
+  }
+  if (CO.stage === 'busy') {
+    body.innerHTML = `
+      <div class="co-busy"><span class="co-spin"></span>
+        <h3>Authorising…</h3><p>${payMethod(CO.method).label} · ${money(CO.cost)}</p></div>`;
+    return;
+  }
+  body.innerHTML = `
+    <div class="co-summary">
+      <div class="co-line"><span>${CO.n} × ticket</span><b>${money(CO.cost)}</b></div>
+      <div class="co-line sm"><span>${esc(CO.title)}</span><span>${money(CO.cost / CO.n)} each</span></div>
+      <div class="co-total"><span>Total</span><b>${money(CO.cost)}</b></div>
+    </div>
+    <div class="co-methods">
+      ${PAY_METHODS.map(m => `
+        <button class="co-method ${m.id === CO.method ? 'sel' : ''}" data-m="${m.id}">
+          <span class="cm-art">${m.art}</span>
+          <span class="cm-txt"><b>${m.label}</b><i>${m.tag}</i></span>
+          <span class="cm-tick"></span>
+        </button>`).join('')}
+    </div>
+    ${methodPanel()}
+    <button class="btn big" id="coPay">Pay ${money(CO.cost)}</button>
+    <p class="co-legal">Demo checkout — no money moves and nothing is stored.</p>`;
+
+  $$('#coBody .co-method').forEach(b => b.addEventListener('click', () => {
+    CO.method = b.dataset.m; renderCheckout();
+  }));
+  $$('#coBody .cc-coin').forEach(b => b.addEventListener('click', () => {
+    $$('#coBody .cc-coin').forEach(x => x.classList.remove('sel'));
+    b.classList.add('sel');
+    const per = { BTC: 0.0000147, ETH: 0.00037, USDT: 1 }[b.dataset.coin];
+    $('#ccAmt').textContent = (CO.cost * per).toFixed(b.dataset.coin === 'USDT' ? 2 : 6) + ' ' + b.dataset.coin;
+  }));
+  $('#coPay').addEventListener('click', async () => {
+    CO.stage = 'busy'; renderCheckout();
+    await new Promise(r => setTimeout(r, 1700));
+    CO.stage = 'done'; renderCheckout();
+  });
 }
 
 /* ============================================================
@@ -295,21 +449,43 @@ async function viewHome(sportFilter) {
 
   ${revealCalendar(comps)}
 
-  <section class="section">
+  <section class="section winners">
     <div class="sec-head">
       <h2>The winners' wall</h2>
       <span class="count">illustrative · demo build</span>
     </div>
+
+    ${(() => { const w = winners[0]; return `
+    <article class="win-hero">
+      <div class="wh-prize">
+        <img src="${w.prizeImg}" alt="${esc(w.prize)}">
+        <div class="wh-face"><img src="${w.photo}" alt=""></div>
+        <span class="wh-week">Week ${w.week.slice(1)} · ${SPORTS[w.sport].icon} ${SPORTS[w.sport].label}</span>
+      </div>
+      <div class="wh-copy">
+        <div class="wh-kicker">She won</div>
+        <h3>${esc(w.prize)}</h3>
+        <div class="wh-sub">${esc(w.prizeSub)}</div>
+        <blockquote>${esc(w.quote)}</blockquote>
+        <div class="wh-who">
+          <b>${esc(w.name)}</b><span>${esc(w.from)}</span>
+          <em>won by <i>${w.dist}</i> units</em>
+        </div>
+      </div>
+    </article>`; })()}
+
     <div class="win-strip">
-      ${winners.map(w => `
+      ${winners.slice(1).map(w => `
         <figure class="win-card">
           <div class="wc-photo">
-            <img src="${w.photo}" alt="" loading="lazy">
+            <img class="wc-prize-bg" src="${w.prizeImg}" alt="${esc(w.prize)}">
+            <div class="wc-face"><img src="${w.photo}" alt=""></div>
             <span class="wc-sport">${SPORTS[w.sport].icon}</span>
             <span class="wc-week">WEEK ${w.week.slice(1)}</span>
           </div>
           <figcaption>
             <div class="p">${esc(w.prize)}</div>
+            <div class="s">${esc(w.prizeSub)}</div>
             <div class="n">${esc(w.name)} · ${esc(w.from)}</div>
             <div class="d">won by <b>${w.dist}</b> units</div>
           </figcaption>
@@ -444,16 +620,19 @@ async function renderGate(c) {
   $('#qMinus').addEventListener('click', () => { qty = Math.max(1, qty - 1); paint(); });
   $('#qPlus').addEventListener('click', () => { qty = Math.min(25, qty + 1); paint(); });
 
-  $('#buyBtn').addEventListener('click', async () => {
-    try {
-      const res = await API.buyTickets(c.id, qty);
-      await refreshWallet(true);
-      toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
-      safeRoute();   // re-enter play → board is now unlocked
-    } catch (err) {
-      if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
-      else toast(err.message, true);
-    }
+  $('#buyBtn').addEventListener('click', () => {
+    openCheckout({
+      n: qty, cost: API.priceFor(qty), compId: c.id, title: c.title,
+      onDone: async () => {
+        // the simulated payment funds the demo wallet, then buys the tickets
+        const cost = API.priceFor(qty);
+        if (cost > (await API.me()).balance) await API.topUp(cost);
+        const res = await API.buyTickets(c.id, qty);
+        await refreshWallet(true);
+        toast(`${res.credits} crosshair${res.credits > 1 ? 's' : ''} in hand — the moment is yours. Aim well 🎯`);
+        safeRoute();
+      },
+    });
   });
 
   $('#finishBtn').addEventListener('click', async () => {
@@ -686,18 +865,20 @@ async function renderBoard(c, submitted) {
   }
   $('#aMinus').addEventListener('click', () => { addQty = Math.max(1, addQty - 1); paintAdd(); });
   $('#aPlus').addEventListener('click', () => { addQty = Math.min(25, addQty + 1); paintAdd(); });
-  $('#addBtn').addEventListener('click', async () => {
-    try {
-      const res = await API.buyTickets(c.id, addQty);
-      credits = res.credits;
-      await refreshWallet(true);
-      $('#tileBal').textContent = money(res.balance).replace('.00', '');
-      renderPins();
-      toast(`+${addQty} ticket${addQty > 1 ? 's' : ''} added to your hand`);
-    } catch (err) {
-      if (String(err.message).includes('Insufficient')) { toast('Not enough balance — top up your wallet', true); openWallet(); }
-      else toast(err.message, true);
-    }
+  $('#addBtn').addEventListener('click', () => {
+    openCheckout({
+      n: addQty, cost: API.priceFor(addQty), compId: c.id, title: c.title,
+      onDone: async () => {
+        try {
+          const res = await API.buyTickets(c.id, addQty);
+          credits = res.credits;
+          const me = await refreshWallet(true);
+          $('#tileBal').textContent = money(me.balance).replace('.00', '');
+          renderPins();
+          toast(`+${addQty} ticket${addQty > 1 ? 's' : ''} added to your hand`);
+        } catch (e) { toast(e.message, true); }
+      },
+    });
   });
 
   $('#finishBtn').addEventListener('click', async () => {
@@ -928,18 +1109,41 @@ async function viewTournament() {
 
 /* ---------- HOW ---------- */
 async function viewHow() {
+  const steps = [
+    { n: '01', art: 'moment', h: 'The moment',
+      p: 'We license a professional sports photograph and lift the ball out of it. Eye-lines, body shape, the spray off the turf — everything else stays exactly as it happened.' },
+    { n: '02', art: 'tickets', h: 'Buy your tickets',
+      p: 'Tickets are bought blind: the photo stays hidden until you hold crosshairs to place. One to twenty-five per board, and the bigger the bundle the less each pin costs.' },
+    { n: '03', art: 'aim', h: 'Aim with the ball itself',
+      p: 'Your cursor is a ghost of the real ball, drawn at its exact size in that frame — so you judge the whole shape, not a dot. A football is no sphere: spin it and turn its nose toward you through a full 360°.' },
+    { n: '04', art: 'judges', h: 'The panel rules',
+      p: 'When entries close, three former professionals mark the ball independently. The official position is the average of their three verdicts — the judges’ ball, not the original photo. That is what makes this skill and not a draw.' },
+    { n: '05', art: 'score', h: 'Closest wins',
+      p: 'Every pin scores 1000 · e⁻ᵈᐟ⁹, where d is its distance from the official position. The single closest crosshair takes the headline prize, and your best pin on each board banks points toward the weekly tournament.' },
+    { n: '06', art: 'pay', h: 'Wallet and payouts',
+      p: 'Pay by Apple Pay, card, PayPal, Venmo or crypto — and cash out the same way. In this demo every balance is simulated; production plugs a real processor into the same API surface.' },
+  ];
   app.innerHTML = `
   <div class="how-page">
     <h1>Skill. <span>Not luck.</span></h1>
-    <p class="lead">Spot the Ball is a game of judgement — legally and philosophically the opposite of a lottery. Here's the full loop, exactly as the production build will run it.</p>
-    <div class="how-grid" style="grid-template-columns:1fr">
-      <div class="how-card"><div class="num">01</div><h3>The moment</h3><p>We license a professional sports photograph and digitally remove the ball. Nothing else in the frame is touched.</p></div>
-      <div class="how-card"><div class="num">02</div><h3>Buy, then aim</h3><p>Tickets are bought blind — the photo stays hidden until you hold crosshairs to place. Your cursor is a ghost of the actual ball at its true size in that frame, so you judge the whole shape, not a dot. A football is no sphere: spin it 360° to the angle you believe it flew at.</p></div>
-      <div class="how-card"><div class="num">03</div><h3>The panel</h3><p>After entries close, a panel of former pros studies the frame and fixes the definitive ball position. The judges' ball — not the original photo — is the target. That's what keeps it 100% skill.</p></div>
-      <div class="how-card"><div class="num">04</div><h3>Scoring</h3><p>Each pin earns <b>1000 · e<sup>−d/9</sup></b> points, where d is the distance to the judges' ball in board units. Closest single pin takes the headline prize; your best pin per contest feeds the weekly tournament pot.</p></div>
-      <div class="how-card"><div class="num">05</div><h3>The wallet</h3><p>Top up, enter, withdraw winnings. In this demo the balance is simulated — the production app plugs a real PSP into the exact same API surface.</p></div>
+    <p class="lead">Spot the Ball is a game of judgement — legally and philosophically the opposite of a lottery. Here is the whole loop, exactly as the production build runs it.</p>
+
+    <div class="how-steps">
+      ${steps.map((s, i) => `
+        <section class="how-step ${i % 2 ? 'flip' : ''}">
+          <figure class="hs-art">${HOW_ART[s.art]}</figure>
+          <div class="hs-copy">
+            <span class="hs-num">${s.n}</span>
+            <h3>${s.h}</h3>
+            <p>${s.p}</p>
+          </div>
+        </section>`).join('')}
     </div>
-    <div style="margin-top:30px"><a class="btn big" href="#/">Try it now →</a></div>
+
+    <div class="how-cta">
+      <a class="btn big" href="#/">Enter a competition →</a>
+      <a class="btn big ghost" href="#/tournament">See the weekly tournament</a>
+    </div>
   </div>`;
 }
 
@@ -984,7 +1188,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 26;
+const BUILD = 27;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
