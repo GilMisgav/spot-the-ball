@@ -1184,6 +1184,128 @@ function revealCalendar(comps) {
   </section>`;
 }
 
+
+/* ============================================================
+   Phone + map: the app in the hand, and where it is legal to play
+   ============================================================ */
+const TERRITORIES = [
+  { n: 'United States',  x: 21.5, y: 38, live: true,  note: '41 states' },
+  { n: 'Canada',         x: 21,   y: 27, live: true,  note: 'nationwide' },
+  { n: 'Mexico',         x: 19,   y: 48, live: true,  note: 'nationwide' },
+  { n: 'Brazil',         x: 33,   y: 64, live: true,  note: 'nationwide' },
+  { n: 'United Kingdom', x: 46.5, y: 29, live: true,  note: 'nationwide' },
+  { n: 'Ireland',        x: 44.5, y: 30, live: true,  note: 'nationwide' },
+  { n: 'Spain',          x: 45.5, y: 37, live: true,  note: 'nationwide' },
+  { n: 'Germany',        x: 49.5, y: 30, live: true,  note: 'nationwide' },
+  { n: 'Italy',          x: 50,   y: 36, live: true,  note: 'nationwide' },
+  { n: 'Israel',         x: 55.5, y: 41, live: true,  note: 'nationwide' },
+  { n: 'Australia',      x: 84,   y: 72, live: true,  note: 'nationwide' },
+  { n: 'New Zealand',    x: 92,   y: 79, live: true,  note: 'nationwide' },
+  { n: 'Japan',          x: 84,   y: 37, live: false, note: 'Q3 2026' },
+  { n: 'India',          x: 69,   y: 47, live: false, note: 'Q4 2026' },
+  { n: 'South Africa',   x: 52,   y: 74, live: false, note: 'Q4 2026' },
+];
+
+/* a coarse landmass grid — one string per row, '#' is land.
+   64 x 30 is enough to read as a world map once dotted. */
+const LAND = [
+  '................................................................',
+  '.....####...........########################################....',
+  '...#########......###########################################...',
+  '..###########....############################################...',
+  '..###########...#############################################...',
+  '...##########.....####..###########################...####......',
+  '....########.........#..######################.####.....##......',
+  '.....######...............####################..................',
+  '.....#####.................##################...................',
+  '......####...................###.####.#####.....................',
+  '.......###......................#..######.......................',
+  '........##.........................######.......................',
+  '.........#..........................####........................',
+  '.........##.........................###........................',
+  '..........###.......................####........................',
+  '...........####.....................#####.......................',
+  '...........#####....................######.................##...',
+  '............#####...................#####.................####..',
+  '............#####...................####.................#####..',
+  '.............####...................####..................####..',
+  '.............####...................###....................##...',
+  '.............###....................###.........................',
+  '.............###....................##..........................',
+  '..............##....................#...........................',
+  '..............##................................................',
+  '...............#................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+  '................................................................',
+];
+
+function worldDots() {
+  const out = [];
+  LAND.forEach((row, ry) => {
+    for (let rx = 0; rx < row.length; rx++) {
+      if (row[rx] !== '#') continue;
+      out.push(`<circle cx="${(rx / 63 * 100).toFixed(2)}" cy="${(ry / 29 * 100).toFixed(2)}" r="0.62"/>`);
+    }
+  });
+  return out.join('');
+}
+
+function phoneAndMap(comps) {
+  const c = comps.find(k => k.sport === 'football' && !k.closed) || comps[0];
+  const live = TERRITORIES.filter(t => t.live).length;
+  return `
+  <section class="section reach">
+    <div class="reach-grid">
+      <div class="rh-copy">
+        <div class="hero-kicker"><span class="live-dot"></span> ${live} territories live</div>
+        <h2>Play it in your hand,<br>anywhere it's legal</h2>
+        <p>The whole contest — buying in, aiming with a true-size ball, the weekend verdict —
+           runs in a single screen. One account, one balance, one wallet, wherever you are.</p>
+        <div class="rh-stores">
+          <span class="rh-store"><b>iOS</b>App Store</span>
+          <span class="rh-store"><b>Android</b>Google Play</span>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="ph-body">
+          <div class="ph-notch"></div>
+          <div class="ph-screen">
+            <div class="ph-top"><span class="ph-brand">SPOT THE <em>BALL</em></span><span class="ph-bal">$238</span></div>
+            <div class="ph-board">
+              <img src="${c.img}" alt="">
+              <span class="ph-ghost">${c.sport === 'football' ? buildFootball(14) : BALL_CURSOR[c.sport]}</span>
+              <span class="ph-pin"></span>
+            </div>
+            <div class="ph-prize"><img src="${c.prizeImg}" alt=""><div><i>WIN</i><b>${esc(c.prizeShort)}</b></div></div>
+            <div class="ph-cta">Lock in 5 crosshairs</div>
+            <div class="ph-nav"><i class="on"></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+        <div class="ph-glow"></div>
+      </div>
+    </div>
+
+    <div class="map-wrap">
+      <svg class="map" viewBox="0 0 100 47" preserveAspectRatio="xMidYMid meet">
+        <g class="map-dots">${worldDots()}</g>
+      </svg>
+      <div class="map-pins">
+        ${TERRITORIES.map((t, i) => `
+          <span class="mp ${t.live ? 'live' : 'soon'}" style="left:${t.x}%;top:${t.y}%;--d:${i * 90}ms">
+            <i></i><em>${t.n}<u>${t.note}</u></em>
+          </span>`).join('')}
+      </div>
+      <div class="map-key">
+        <span><i class="live"></i>Live now</span>
+        <span><i class="soon"></i>Coming next</span>
+      </div>
+    </div>
+  </section>`;
+}
+
 /* ---------- HOME ---------- */
 async function viewHome(sportFilter) {
   const comps = await API.listCompetitions();
@@ -1250,6 +1372,8 @@ async function viewHome(sportFilter) {
   </section>
 
   ${revealCalendar(comps)}
+
+  ${phoneAndMap(comps)}
 
   <section class="section winners">
     <div class="sec-head">
@@ -1583,6 +1707,7 @@ async function renderBoard(c, submitted) {
           <div class="board" id="board">
             <img src="${c.img}" alt="${esc(c.title)}" draggable="false">
             <div class="hairV"></div><div class="hairH"></div>
+            <svg class="guides" id="guides" preserveAspectRatio="none" viewBox="0 0 100 100"></svg>
             <div class="ball-cursor" id="ballCursor">${c.sport === "football" ? buildFootball(0) : BALL_CURSOR[c.sport]}${BALL_CENTRE}</div>
             <div class="coords"></div>
           </div>
@@ -1598,6 +1723,15 @@ async function renderBoard(c, submitted) {
           <div class="ct"><div class="n" id="tileLeft">0</div><div class="l">In hand</div></div>
           <div class="ct"><div class="n" id="tileSub">${submitted.length}</div><div class="l">Locked</div></div>
           <div class="ct"><div class="n" id="tileBal">…</div><div class="l">Balance</div></div>`)}
+
+        <div class="panel-card">
+          <h4>Sight lines <span class="mono" id="guideCount">0 drawn</span></h4>
+          <p class="sub-more">Trace where the players are looking, or extend a limb, to work out where the ball has to be. Lines are yours alone — they are never submitted.</p>
+          <div class="guide-row">
+            <button class="btn ghost" id="drawToggle">✎ Draw lines</button>
+            <button class="btn ghost" id="guideClear">Clear</button>
+          </div>
+        </div>
 
         <div class="panel-card">
           <h4>Your crosshairs <span class="mono" id="pickCount"></span></h4>
@@ -1642,6 +1776,57 @@ async function renderBoard(c, submitted) {
   let addQty = 5;
 
   refreshWallet().then(me => $('#tileBal').textContent = money(me.balance).replace('.00', ''));
+
+  /* ---- sight lines: straight guides the player draws to reason with ---- */
+  let guides = [];            // [{x1,y1,x2,y2}] in % space
+  let drawing = false;        // draw mode on/off
+  let live = null;            // the line being dragged
+
+  const gsvg = $('#guides');
+  function renderGuides() {
+    const all = live ? guides.concat([live]) : guides;
+    gsvg.innerHTML = all.map((g, i) => `
+      <line x1="${g.x1}" y1="${g.y1}" x2="${g.x2}" y2="${g.y2}"
+            class="${live && i === all.length - 1 ? 'live' : ''}"/>
+      <circle cx="${g.x1}" cy="${g.y1}" r="0.55"/>
+      <circle cx="${g.x2}" cy="${g.y2}" r="0.55"/>`).join('');
+    const gc = $('#guideCount');
+    if (gc) gc.textContent = `${guides.length} drawn`;
+  }
+  function setDraw(on) {
+    drawing = on;
+    board.classList.toggle('drawing', on);
+    const b = $('#drawToggle');
+    b.classList.toggle('on', on);
+    b.textContent = on ? '✎ Drawing — click to stop' : '✎ Draw lines';
+  }
+  $('#drawToggle').addEventListener('click', () => setDraw(!drawing));
+  $('#guideClear').addEventListener('click', () => { guides = []; live = null; renderGuides(); });
+
+  const pctOf = e => {
+    const r = board.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width * 100, y: (e.clientY - r.top) / r.height * 100 };
+  };
+  board.addEventListener('mousedown', e => {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pctOf(e);
+    live = { x1: p.x, y1: p.y, x2: p.x, y2: p.y };
+    renderGuides();
+  });
+  board.addEventListener('mousemove', e => {
+    if (!drawing || !live) return;
+    const p = pctOf(e);
+    live.x2 = p.x; live.y2 = p.y;
+    renderGuides();
+  });
+  addEventListener('mouseup', () => {
+    if (!live) return;
+    const long = Math.hypot(live.x2 - live.x1, live.y2 - live.y1) > 1.5;
+    if (long) guides.push(live);
+    live = null;
+    renderGuides();
+  });
 
   function renderPins() {
     $$('.pin', board).forEach(p => p.remove());
@@ -1764,6 +1949,7 @@ async function renderBoard(c, submitted) {
     setTimeout(() => board.classList.remove('aiming'), 1200);
   }, { passive: false });
   function place(pt) {
+    if (drawing) return;                 // drawing a guide, not aiming
     if (picks.length >= credits) { toast('No tickets left in hand — add more below', true); return; }
     const r = board.getBoundingClientRect();
     const x = (pt.clientX - r.left) / r.width * 100;
@@ -1892,6 +2078,19 @@ async function viewResults(id) {
               <span class="cmark"><i class="ch"></i><i class="cv"></i><i class="cd"></i></span>
             </div>
           </div>
+          ${played ? `
+            <div class="res-loupe" id="resLoupe">
+              <div class="rl-view" id="rlView">
+                <span class="rl-ball"></span>
+                <span class="rl-pin"></span>
+                <svg class="rl-line" id="rlLine"><line x1="0" y1="0" x2="0" y2="0"/></svg>
+              </div>
+              <div class="rl-foot">
+                <span><i class="k-ball"></i>judges' ball</span>
+                <span><i class="k-pin"></i>your best pin</span>
+                <b>${myBest.d.toFixed(2)}</b>
+              </div>
+            </div>` : ''}
           <div class="board-hint">
             <span><span class="k">●</span> the real ball, restored — centre marked ${played ? '· your pins numbered by closeness' : ''}</span>
             <span>score = 1000 · e<sup>−d/9</sup> per pin</span>
@@ -1948,7 +2147,44 @@ async function viewResults(id) {
       <span class="n">${i === 0 ? `YOU · #${myRank}` : i + 1}</span>`;
     rb.appendChild(el);
   });
+  /* the magnified inset: photo at 3.4x, centred between the ball and my pin */
   if (myBest) {
+    const view = $('#rlView');
+    const drawLoupe = () => {
+      if (!view) return;
+      const S = view.clientWidth || 210;
+      const bw = rb.clientWidth, bh = rb.clientHeight;
+      const mx = (target.x + myBest.x) / 2, my = (target.y + myBest.y) / 2;
+      /* frame the window to the miss: a near-perfect pin gets a tight zoom,
+         a wide miss zooms out until both marks fit with room to spare */
+      const spanPct = Math.min(46, Math.max(c.ballSize * 3.2, myBest.d * 2.8 + c.ballSize * 2));
+      const Z = 100 / spanPct;
+      view.style.backgroundImage = `url('${c.img}')`;
+      view.style.backgroundSize = `${bw * Z}px ${bh * Z}px`;
+      view.style.backgroundPosition =
+        `${-(mx / 100 * bw * Z - S / 2)}px ${-(my / 100 * bh * Z - S / 2)}px`;
+      const put = (el, px, py) => {
+        el.style.left = ((px - mx) / 100 * bw * Z + S / 2) + 'px';
+        el.style.top = ((py - my) / 100 * bh * Z + S / 2) + 'px';
+      };
+      const ballEl = $('.rl-ball', view), pinEl = $('.rl-pin', view);
+      const bs = c.ballSize / 100 * bw * Z;
+      ballEl.style.width = bs + 'px';
+      ballEl.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
+      pinEl.style.width = bs + 'px';
+      pinEl.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
+      put(ballEl, target.x, target.y);
+      put(pinEl, myBest.x, myBest.y);
+      const ln = $('line', $('#rlLine'));
+      ln.setAttribute('x1', (target.x - mx) / 100 * bw * Z + S / 2);
+      ln.setAttribute('y1', (target.y - my) / 100 * bh * Z + S / 2);
+      ln.setAttribute('x2', (myBest.x - mx) / 100 * bw * Z + S / 2);
+      ln.setAttribute('y2', (myBest.y - my) / 100 * bh * Z + S / 2);
+    };
+    const rimg2 = $('img', rb);
+    if (rimg2.complete) drawLoupe(); else rimg2.addEventListener('load', drawLoupe);
+    addEventListener('resize', drawLoupe);
+
     // dashed line from best pin to ball, in % space via transform
     const img = $('img', rb);
     const draw = () => {
@@ -2120,7 +2356,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 34;
+const BUILD = 37;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
