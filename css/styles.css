@@ -1939,3 +1939,18 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 .map-key .live { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
 .map-key .soon { border: 2px dashed var(--violet-hi); }
 @media (prefers-reduced-motion: reduce) { .ph-body, .mp i, .mp.live::after { animation: none !important } }
+
+/* a pin that misses beyond the close-up is pinned to the rim as an arrow */
+.rl-pin.edge {
+  border-style: solid; border-width: 3px;
+  box-shadow: 0 0 0 2px rgba(10,9,24,.85), 0 0 18px 5px rgba(34,211,238,.75);
+}
+.rl-pin.edge::after {
+  content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px;
+  margin: -3.5px; border-radius: 50%; background: var(--cyan);
+}
+.res-loupe.far .rl-foot b { color: var(--danger); }
+.res-loupe.far .rl-foot::before {
+  content: 'off frame'; font-size: 8px; letter-spacing: .1em;
+  color: var(--danger); margin-left: auto; margin-right: 6px;
+}

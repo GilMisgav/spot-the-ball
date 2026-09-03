@@ -1358,33 +1358,41 @@ async function viewResults(id) {
       if (!view) return;
       const S = view.clientWidth || 210;
       const bw = rb.clientWidth, bh = rb.clientHeight;
-      const mx = (target.x + myBest.x) / 2, my = (target.y + myBest.y) / 2;
-      /* frame the window to the miss: a near-perfect pin gets a tight zoom,
-         a wide miss zooms out until both marks fit with room to spare */
-      const spanPct = Math.min(46, Math.max(c.ballSize * 3.2, myBest.d * 2.8 + c.ballSize * 2));
-      const Z = 100 / spanPct;
+      /* The window covers `span` percent of the board width. Scale the photo so
+         that span maps exactly onto S: BGW = S * 100 / span. The zoom is locked
+         on the ball — a pin outside the window clamps to the rim as an arrow. */
+      const spanPct = c.ballSize * 4.6;
+      const BGW = S * 100 / spanPct, BGH = BGW * (bh / bw);
+      const px = p => p / 100 * BGW, py = p => p / 100 * BGH;
+
       view.style.backgroundImage = `url('${c.img}')`;
-      view.style.backgroundSize = `${bw * Z}px ${bh * Z}px`;
-      view.style.backgroundPosition =
-        `${-(mx / 100 * bw * Z - S / 2)}px ${-(my / 100 * bh * Z - S / 2)}px`;
-      const put = (el, px, py) => {
-        el.style.left = ((px - mx) / 100 * bw * Z + S / 2) + 'px';
-        el.style.top = ((py - my) / 100 * bh * Z + S / 2) + 'px';
-      };
+      view.style.backgroundSize = `${BGW.toFixed(1)}px ${BGH.toFixed(1)}px`;
+      view.style.backgroundPosition = `${(S / 2 - px(target.x)).toFixed(1)}px ${(S / 2 - py(target.y)).toFixed(1)}px`;
+
+      const bs = px(c.ballSize);
       const ballEl = $('.rl-ball', view), pinEl = $('.rl-pin', view);
-      const bs = c.ballSize / 100 * bw * Z;
-      ballEl.style.width = bs + 'px';
-      ballEl.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
-      pinEl.style.width = bs + 'px';
-      pinEl.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
-      put(ballEl, target.x, target.y);
-      put(pinEl, myBest.x, myBest.y);
+      [ballEl, pinEl].forEach(el => {
+        el.style.width = bs + 'px';
+        el.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
+      });
+      ballEl.style.left = S / 2 + 'px';
+      ballEl.style.top = S / 2 + 'px';
+
+      let dx = px(myBest.x - target.x), dy = py(myBest.y - target.y);
+      const lim = S / 2 - bs * 0.45;
+      const reach = Math.hypot(dx, dy);
+      const off = reach > lim;
+      if (off) { const k = lim / reach; dx *= k; dy *= k; }
+      pinEl.classList.toggle('edge', off);
+      pinEl.style.left = (S / 2 + dx) + 'px';
+      pinEl.style.top = (S / 2 + dy) + 'px';
+
       const ln = $('line', $('#rlLine'));
-      ln.setAttribute('x1', (target.x - mx) / 100 * bw * Z + S / 2);
-      ln.setAttribute('y1', (target.y - my) / 100 * bh * Z + S / 2);
-      ln.setAttribute('x2', (myBest.x - mx) / 100 * bw * Z + S / 2);
-      ln.setAttribute('y2', (myBest.y - my) / 100 * bh * Z + S / 2);
+      ln.setAttribute('x1', S / 2); ln.setAttribute('y1', S / 2);
+      ln.setAttribute('x2', S / 2 + dx); ln.setAttribute('y2', S / 2 + dy);
+      $('#resLoupe').classList.toggle('far', off);
     };
+
     const rimg2 = $('img', rb);
     if (rimg2.complete) drawLoupe(); else rimg2.addEventListener('load', drawLoupe);
     addEventListener('resize', drawLoupe);
@@ -1560,7 +1568,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 37;
+const BUILD = 40;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
