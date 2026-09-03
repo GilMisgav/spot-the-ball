@@ -1680,3 +1680,10 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
 .board-shell { border-color: var(--line-2); }
 .board-hint { background: rgba(20,15,46,.82); }
 .board-hint .k { color: var(--violet-hi); }
+
+/* .btn.big carries its own radius in the base sheet — pill it too */
+.btn.big, .btn.ghost, .btn.danger, .cc-foot .btn, .panel .btn, .wm-btns .btn { border-radius: 999px; }
+.modal-x { border-radius: 999px; }
+.foot-brand em { color: var(--violet-hi); }
+.win-card, .rc-prize, .m-cell { border-radius: 18px; }
+.wc-photo, .wh-prize { border-radius: 0; }
