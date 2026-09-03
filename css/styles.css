@@ -5,24 +5,31 @@
    ============================================================ */
 
 :root {
-  --ink: #0a0d13;
-  --ink-2: #0f131c;
-  --ink-3: #151b27;
-  --line: rgba(255, 255, 255, .08);
-  --line-2: rgba(255, 255, 255, .14);
-  --text: #eef1f6;
-  --text-dim: #9aa3b2;
-  --text-faint: #626c7d;
-  --gold: #f2b24b;
-  --gold-hi: #ffd98a;
-  --gold-deep: #b97f22;
-  --danger: #ff5d6c;
-  --ok: #3ddc84;
+  /* Electric Night — deep indigo ground, violet current, gold reserved for winning */
+  --ink: #0a0918;
+  --ink-2: #140f2e;
+  --ink-3: #1c1640;
+  --glass: rgba(124, 77, 255, .07);
+  --line: rgba(168, 140, 255, .14);
+  --line-2: rgba(168, 140, 255, .26);
+  --text: #f3f0ff;
+  --text-dim: #a99fd0;
+  --text-faint: #6f6699;
+  --violet: #7c4dff;
+  --violet-hi: #a884ff;
+  --violet-deep: #4b21c9;
+  --cyan: #22d3ee;
+  --gold: #ffc247;
+  --gold-hi: #ffe08a;
+  --gold-deep: #c98a15;
+  --danger: #ff5d80;
+  --ok: #34e5a1;
   --disp: 'Big Shoulders Display', sans-serif;
   --body: 'Archivo', sans-serif;
   --mono: 'Spline Sans Mono', monospace;
-  --rad: 14px;
-  --shadow: 0 24px 60px -18px rgba(0, 0, 0, .65);
+  --rad: 24px;
+  --shadow: 0 28px 70px -20px rgba(6, 3, 22, .85);
+  --glow: 0 0 0 1px rgba(168,140,255,.22), 0 18px 50px -14px rgba(124, 77, 255, .45);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -38,13 +45,14 @@ body {
   min-height: 100vh;
 }
 body::before {
-  /* floodlight wash */
+  /* electric wash: violet current from above, cyan lift from below */
   content: '';
   position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
-    radial-gradient(1100px 520px at 18% -8%, rgba(242, 178, 75, .10), transparent 60%),
-    radial-gradient(900px 500px at 85% -10%, rgba(90, 140, 255, .07), transparent 60%),
-    radial-gradient(1400px 800px at 50% 115%, rgba(242, 178, 75, .05), transparent 55%);
+    radial-gradient(1200px 620px at 14% -10%, rgba(124, 77, 255, .34), transparent 62%),
+    radial-gradient(1000px 560px at 88% -6%, rgba(180, 76, 255, .22), transparent 60%),
+    radial-gradient(1300px 700px at 50% 112%, rgba(34, 211, 238, .10), transparent 58%),
+    linear-gradient(180deg, #150d33 0%, #0a0918 46%, #0a0918 100%);
 }
 .grain {
   position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .05;
@@ -1476,3 +1484,199 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
   .tourn-clock { text-align: left; }
   .site-footer { margin-bottom: 0; }
 }
+
+/* ════════════════════════════════════════════════════════════
+   ELECTRIC NIGHT — surface layer
+   Rounder geometry, glass panels, violet current for anything
+   interactive; gold stays reserved for prizes and winning.
+   ════════════════════════════════════════════════════════════ */
+
+/* ---- floating navigation capsule ---- */
+.topbar {
+  top: 14px; height: 62px; margin: 0 auto;
+  max-width: calc(1320px - 24px); width: calc(100% - 28px);
+  border-radius: 999px; border: 1px solid var(--line-2);
+  background: rgba(20, 15, 46, .74); backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: var(--glow), inset 0 1px 0 rgba(255,255,255,.07);
+  padding: 0 10px 0 22px;
+}
+.brand-mark { color: var(--violet-hi); }
+.brand-word em { color: var(--violet-hi); }
+.topnav a { border-radius: 999px; }
+.topnav a.active {
+  color: #fff; background: linear-gradient(135deg, var(--violet), #b44cff);
+  box-shadow: 0 8px 24px -8px rgba(124,77,255,.8), inset 0 1px 0 rgba(255,255,255,.25);
+}
+.wallet-chip {
+  background: rgba(124,77,255,.14); border-color: var(--line-2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.wallet-chip:hover { border-color: var(--violet-hi); }
+.wallet-chip svg { color: var(--gold); }
+.wallet-chip b {
+  background: linear-gradient(160deg, var(--gold-hi), var(--gold-deep)); color: #2a1a00;
+  box-shadow: 0 3px 10px -2px rgba(255,194,71,.7), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.avatar {
+  background: linear-gradient(140deg, var(--violet-hi), var(--violet-deep)); color: #fff;
+  box-shadow: 0 6px 18px -6px rgba(124,77,255,.8), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* ---- pill buttons with a current running through them ---- */
+.btn {
+  border-radius: 999px; padding: 13px 26px;
+  background: linear-gradient(135deg, var(--violet) 0%, #b44cff 100%); color: #fff;
+  box-shadow: 0 12px 32px -10px rgba(124,77,255,.85), inset 0 1px 0 rgba(255,255,255,.28);
+}
+.btn:hover {
+  background: linear-gradient(135deg, var(--violet-hi) 0%, #c96bff 100%);
+  box-shadow: 0 16px 40px -10px rgba(124,77,255,1), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.btn.big { padding: 17px 34px; }
+.btn.ghost {
+  background: rgba(124,77,255,.10); color: var(--text);
+  border: 1px solid var(--line-2); box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+}
+.btn.ghost:hover {
+  border-color: var(--violet-hi); color: #fff;
+  background: rgba(124,77,255,.20); box-shadow: 0 10px 28px -12px rgba(124,77,255,.7);
+}
+/* money actions stay gold — the one thing that never turns violet */
+#buyBtn, #coPay, #coFinish, .wm-btns .btn {
+  background: linear-gradient(135deg, var(--gold-hi) 0%, var(--gold) 55%, var(--gold-deep) 100%);
+  color: #2a1a00; text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  box-shadow: 0 12px 32px -10px rgba(255,194,71,.8), inset 0 1px 0 rgba(255,255,255,.55);
+}
+#buyBtn:hover, #coPay:hover, #coFinish:hover, .wm-btns .btn:hover {
+  background: linear-gradient(135deg, #fff0c4 0%, var(--gold-hi) 55%, var(--gold) 100%);
+}
+
+/* ---- glass panels ---- */
+.comp-card, .panel-card, .how-card, .win-card, .win-hero, .rc-stage,
+.board-shell, .sub-clock, .lb-card, .hs-art, .modal {
+  border-radius: var(--rad);
+  border: 1px solid var(--line);
+  background: linear-gradient(168deg, rgba(124,77,255,.11), rgba(20,15,46,.86) 55%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 50px -22px rgba(6,3,22,.9), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.comp-card:hover {
+  border-color: var(--violet-hi);
+  box-shadow: 0 26px 60px -20px rgba(124,77,255,.55), inset 0 1px 0 rgba(255,255,255,.1);
+}
+.cc-plate {
+  background:
+    radial-gradient(120% 100% at 50% -10%, color-mix(in srgb, var(--acc, var(--violet)) 26%, transparent), transparent 60%),
+    linear-gradient(180deg, #241a52, #120e28);
+}
+.cc-plate::after { background: linear-gradient(180deg, transparent 50%, rgba(10,9,24,.92) 100%); }
+.cc-flag {
+  background: linear-gradient(135deg, var(--violet), #b44cff); color: #fff;
+  box-shadow: 0 6px 18px -6px rgba(124,77,255,.9);
+}
+.cc-flag.closed { background: linear-gradient(135deg, #ff5d80, #c9184a); }
+.cc-sport { border-radius: 999px; background: rgba(10,9,24,.66); }
+.cc-bar { background: rgba(124,77,255,.16); }
+.cc-bar i { background: linear-gradient(90deg, var(--violet), var(--cyan)); }
+.cc-prize .p-label { color: var(--violet-hi); }
+.cc-foot .btn { border-radius: 999px; }
+
+/* ---- section furniture ---- */
+.sec-head h2 { text-shadow: 0 0 60px rgba(124,77,255,.5); }
+.hero h1 .x { -webkit-text-stroke: 2px var(--violet-hi); }
+.hero h1 .g {
+  color: transparent; background: linear-gradient(100deg, var(--gold-hi), var(--gold) 55%, #ff9d4d);
+  -webkit-background-clip: text; background-clip: text;
+}
+.hero-kicker { color: var(--violet-hi); }
+.hero-kicker::before { background: var(--violet-hi); }
+.hstat .n {
+  color: transparent; background: linear-gradient(120deg, #fff, var(--violet-hi));
+  -webkit-background-clip: text; background-clip: text;
+}
+.hero-deco .ring { border-color: rgba(168,140,255,.45); }
+.hero-deco .hline, .hero-deco .vline { background: rgba(168,140,255,.5); }
+.hero-deco .dot { background: var(--violet-hi); box-shadow: 0 0 26px 5px rgba(124,77,255,.7); }
+
+/* sport dividers pick up the glow */
+.sd-medal {
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.16), transparent 55%), var(--ink-3);
+}
+.sport-tab { border-radius: 999px; background: rgba(124,77,255,.10); }
+.sport-tab.active {
+  background: linear-gradient(135deg, var(--violet), #b44cff); color: #fff; border-color: transparent;
+  box-shadow: 0 10px 26px -10px rgba(124,77,255,.9);
+}
+
+/* ---- inputs, tiles, chips ---- */
+.ct, .bundle, .stepper button, .cy-coin, .co-method, .co-summary, .wm-balance,
+.pick-row, .co-fields input, .co-receipt, .m-cell, .rc-day, .rc-prize {
+  border-radius: 16px;
+}
+.ct { background: rgba(124,77,255,.10); }
+.ct .n { color: var(--text); }
+.bundle.sel {
+  border-color: var(--violet-hi); background: rgba(124,77,255,.20);
+  box-shadow: 0 0 0 1px var(--violet-hi), 0 12px 30px -14px rgba(124,77,255,.8);
+}
+.bundle.sel b { color: #fff; }
+.bundle i { color: var(--gold-hi); }
+.co-method.sel { border-color: var(--violet-hi); background: rgba(124,77,255,.18); }
+.co-method.sel .cm-tick { border-color: var(--violet-hi); background: var(--violet-hi); }
+.co-method.sel .cm-tick::after { border-color: #1a0f3d; }
+.co-total b, .wm-balance strong { color: var(--gold-hi); }
+.cy-coin.sel { border-color: var(--violet-hi); color: #fff; background: rgba(124,77,255,.2); }
+#angSlider, #tiltSlider { background: linear-gradient(90deg, var(--violet-deep), var(--violet-hi)); }
+#angSlider::-webkit-slider-thumb, #tiltSlider::-webkit-slider-thumb {
+  background: #fff; box-shadow: 0 0 14px rgba(168,140,255,.95);
+}
+
+/* ---- leaderboards and results ---- */
+.lb tr.me td { background: rgba(124,77,255,.16); }
+.lb tr.me .name { color: #fff; }
+.lb .pts { color: var(--gold-hi); }
+.you-chip {
+  background: linear-gradient(135deg, var(--violet-hi), #d18bff); color: #fff;
+  box-shadow: 0 4px 14px -4px rgba(124,77,255,.9);
+}
+.res-stat { border-radius: 18px; background: rgba(124,77,255,.10); }
+.res-stat .n {
+  color: transparent; background: linear-gradient(120deg, #fff, var(--violet-hi));
+  -webkit-background-clip: text; background-clip: text;
+}
+.res-stat .n.top {
+  background: linear-gradient(120deg, var(--gold-hi), var(--gold));
+  -webkit-background-clip: text; background-clip: text;
+}
+
+/* ---- the calendar picks up the current ---- */
+.wk-days i { border-radius: 12px; background: rgba(124,77,255,.10); }
+.wk-days i.wknd { background: rgba(255,194,71,.10); }
+.wk-days i.reveal {
+  background: linear-gradient(180deg, rgba(255,194,71,.32), rgba(255,194,71,.12));
+  border-color: var(--gold);
+}
+.rc-day { background: rgba(124,77,255,.10); }
+.rc-dot { background: var(--ink); border-color: var(--line-2); }
+.rc-sweep { background: linear-gradient(90deg, transparent, rgba(168,140,255,.22) 45%, transparent); }
+
+/* ---- floating mobile capsule ---- */
+.mobile-nav {
+  left: 12px; right: 12px; bottom: 12px; border-radius: 26px;
+  border: 1px solid var(--line-2); background: rgba(20,15,46,.86);
+  backdrop-filter: blur(20px) saturate(1.4);
+  box-shadow: 0 -6px 40px -12px rgba(6,3,22,.95), var(--glow);
+  padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
+}
+.mobile-nav a.active { color: var(--violet-hi); }
+@media (max-width: 760px) {
+  body { padding-bottom: 92px; }
+  .topbar { top: 8px; width: calc(100% - 16px); padding: 0 8px 0 16px; }
+  .toast { bottom: 104px; }
+}
+
+/* ---- keep the game board honest: no violet over the photograph ---- */
+.board-shell { border-color: var(--line-2); }
+.board-hint { background: rgba(20,15,46,.82); }
+.board-hint .k { color: var(--violet-hi); }
