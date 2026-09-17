@@ -1734,12 +1734,14 @@ main { position: relative; z-index: 2; min-height: 68vh; isolation: isolate; }
   width: 100%; height: 100%; overflow: visible;
 }
 .guides line {
-  stroke: var(--cyan); stroke-width: .34; stroke-linecap: round;
-  filter: drop-shadow(0 0 3px rgba(34,211,238,.95));
+  /* non-scaling-stroke measures the width in CSS px, not viewBox units —
+     .34 there drew a third of a pixel, which read as nothing on the photo */
+  stroke: var(--cyan); stroke-width: 2.4; stroke-linecap: round;
+  filter: drop-shadow(0 0 5px rgba(34,211,238,.95)) drop-shadow(0 0 2px rgba(0,0,0,.9));
   vector-effect: non-scaling-stroke;
 }
-.guides line.live { stroke-dasharray: 1.6 1.2; opacity: .85; }
-.guides circle { fill: #fff; filter: drop-shadow(0 0 4px rgba(34,211,238,1)); }
+.guides line.live { stroke-dasharray: 1.4 1.0; opacity: .9; }
+.guides circle { fill: #fff; filter: drop-shadow(0 0 5px rgba(34,211,238,1)) drop-shadow(0 0 2px rgba(0,0,0,.9)); }
 .board.drawing { cursor: crosshair; }
 .board.drawing .ball-cursor, .board.drawing .hairV,
 .board.drawing .hairH, .board.drawing .coords { opacity: 0 !important; }

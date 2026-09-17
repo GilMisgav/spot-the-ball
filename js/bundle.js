@@ -2163,29 +2163,43 @@ async function viewResults(id) {
 
       view.style.backgroundImage = `url('${c.img}')`;
       view.style.backgroundSize = `${BGW.toFixed(1)}px ${BGH.toFixed(1)}px`;
-      view.style.backgroundPosition = `${(S / 2 - px(target.x)).toFixed(1)}px ${(S / 2 - py(target.y)).toFixed(1)}px`;
+
+      /* Keep the window inside the photo. A ball near an edge — fb-pocket sits
+         9.5% from the top — would otherwise magnify the empty ground beside
+         the frame instead of the play. */
+      const cx = px(target.x), cy = py(target.y);
+      const clamp = (v, lo, hi) => hi < lo ? (lo + hi) / 2 : Math.min(hi, Math.max(lo, v));
+      const ox = clamp(S / 2 - cx, S - BGW, 0);
+      const oy = clamp(S / 2 - cy, S - BGH, 0);
+      view.style.backgroundPosition = `${ox.toFixed(1)}px ${oy.toFixed(1)}px`;
 
       const bs = px(c.ballSize);
+      const ballX = cx + ox, ballY = cy + oy;
       const ballEl = $('.rl-ball', view), pinEl = $('.rl-pin', view);
       [ballEl, pinEl].forEach(el => {
         el.style.width = bs + 'px';
         el.style.height = (c.sport === 'football' ? bs * 0.606 : bs) + 'px';
       });
-      ballEl.style.left = S / 2 + 'px';
-      ballEl.style.top = S / 2 + 'px';
+      ballEl.style.left = ballX + 'px';
+      ballEl.style.top = ballY + 'px';
 
       let dx = px(myBest.x - target.x), dy = py(myBest.y - target.y);
-      const lim = S / 2 - bs * 0.45;
-      const reach = Math.hypot(dx, dy);
-      const off = reach > lim;
-      if (off) { const k = lim / reach; dx *= k; dy *= k; }
+      /* the pin clamps to the rim of the window, as an arrow, when it falls outside */
+      const m = bs * 0.45;
+      let k = 1;
+      if (dx < m - ballX) k = Math.min(k, (m - ballX) / dx);
+      if (dx > S - m - ballX) k = Math.min(k, (S - m - ballX) / dx);
+      if (dy < m - ballY) k = Math.min(k, (m - ballY) / dy);
+      if (dy > S - m - ballY) k = Math.min(k, (S - m - ballY) / dy);
+      const off = k < 1 && isFinite(k);
+      if (off) { dx *= k; dy *= k; }
       pinEl.classList.toggle('edge', off);
-      pinEl.style.left = (S / 2 + dx) + 'px';
-      pinEl.style.top = (S / 2 + dy) + 'px';
+      pinEl.style.left = (ballX + dx) + 'px';
+      pinEl.style.top = (ballY + dy) + 'px';
 
       const ln = $('line', $('#rlLine'));
-      ln.setAttribute('x1', S / 2); ln.setAttribute('y1', S / 2);
-      ln.setAttribute('x2', S / 2 + dx); ln.setAttribute('y2', S / 2 + dy);
+      ln.setAttribute('x1', ballX); ln.setAttribute('y1', ballY);
+      ln.setAttribute('x2', ballX + dx); ln.setAttribute('y2', ballY + dy);
       $('#resLoupe').classList.toggle('far', off);
     };
 
@@ -2364,7 +2378,7 @@ async function safeRoute() {
   catch (err) { console.error('[spot-the-ball]', err); crashScreen(err); }
 }
 
-const BUILD = 40;
+const BUILD = 41;
 const stamp = document.getElementById('buildStamp');
 if (stamp) stamp.textContent = 'build ' + BUILD;
 
